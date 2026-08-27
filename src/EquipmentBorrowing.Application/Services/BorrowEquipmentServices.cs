@@ -1,12 +1,7 @@
-﻿
-namespace EquipmentBorrowing.Application.Services;
-
+﻿namespace EquipmentBorrowing.Application.Services;
 
 using EquipmentBorrowing.Application;
-using EquipmentBorrowing.Domain;
 using EquipmentBorrowing.Domain.Entities;
-
-
 
 public sealed class BorrowEquipmentService
 {
