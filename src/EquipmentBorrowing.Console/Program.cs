@@ -3,9 +3,7 @@ using EquipmentBorrowing.Application.Services;
 using EquipmentBorrowing.Domain.Entities;
 using EquipmentBorrowing.Infrastructure.Repositories;
 
-// --------------------------------------------------
 // 1. Create sample data
-// --------------------------------------------------
 
 Student student = new Student(
     studentId: 1,
@@ -17,10 +15,7 @@ Equipment equipment = new Equipment(
     equipmentId: 1,
     equipmentName: "Laptop");
 
-
-// --------------------------------------------------
 // 2. Create repository implementations
-// --------------------------------------------------
 
 IStudentRepository studentRepository =
     new InMemoryStudentRepository(
@@ -34,9 +29,7 @@ IBorrowingRepository borrowingRepository =
     new InMemoryBorrowingRepository();
 
 
-// --------------------------------------------------
 // 3. Create the application service
-// --------------------------------------------------
 
 BorrowEquipmentService borrowingService =
     new BorrowEquipmentService(
@@ -45,10 +38,7 @@ BorrowEquipmentService borrowingService =
         borrowingRepository,
         maximumActiveBorrowings: 3);
 
-
-// --------------------------------------------------
 // 4. Execute a successful borrowing request
-// --------------------------------------------------
 
 Console.WriteLine("=== Equipment Borrowing System ===");
 Console.WriteLine();
@@ -65,10 +55,7 @@ BorrowResult result =
 Console.WriteLine($"Success: {result.IsSuccess}");
 Console.WriteLine($"Message: {result.Message}");
 
-
-// --------------------------------------------------
 // 5. Display resulting domain state
-// --------------------------------------------------
 
 Console.WriteLine();
 Console.WriteLine("=== Resulting State ===");
@@ -94,10 +81,7 @@ if (result.Borrowing is not null)
         $"Expected Return Date: {result.Borrowing.ExpectedReturnDate}");
 }
 
-
-// --------------------------------------------------
 // 6. Execute an unsuccessful borrowing request
-// --------------------------------------------------
 
 Console.WriteLine();
 Console.WriteLine("=== Second Borrowing Attempt ===");

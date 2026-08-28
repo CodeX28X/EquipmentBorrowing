@@ -46,49 +46,4 @@ public class InMemoryEquipmentRepositoryTests
         // Assert
         Assert.Null(result);
     }
-
-    [Fact]
-    public async Task UpdateAsync_WhenEquipmentExists_ReplacesEquipment()
-    {
-        // Arrange
-        Equipment originalEquipment = new Equipment(
-            1,
-            "Laptop");
-
-        Equipment updatedEquipment = new Equipment(
-            1,
-            "Updated Laptop");
-
-        InMemoryEquipmentRepository repository =
-            new InMemoryEquipmentRepository(
-                new[] { originalEquipment });
-
-        // Act
-        await repository.UpdateAsync(updatedEquipment);
-
-        Equipment? result =
-            await repository.GetByIdAsync(1);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(
-            "Updated Laptop",
-            result.EquipmentName);
-    }
-
-    [Fact]
-    public async Task UpdateAsync_WhenEquipmentDoesNotExist_ThrowsInvalidOperationException()
-    {
-        // Arrange
-        Equipment equipment = new Equipment(
-            999,
-            "Laptop");
-
-        InMemoryEquipmentRepository repository =
-            new InMemoryEquipmentRepository();
-
-        // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => repository.UpdateAsync(equipment));
-    }
 }

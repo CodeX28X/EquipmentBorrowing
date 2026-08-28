@@ -9,7 +9,4 @@ public interface IEquipmentRepository
         int equipmentId,
         CancellationToken cancellationToken = default);
 
-    Task UpdateAsync(
-        Equipment equipment,
-        CancellationToken cancellationToken = default);
 }

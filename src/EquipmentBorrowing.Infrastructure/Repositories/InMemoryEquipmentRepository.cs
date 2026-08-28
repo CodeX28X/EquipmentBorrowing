@@ -23,22 +23,4 @@ public sealed class InMemoryEquipmentRepository : IEquipmentRepository
 
         return Task.FromResult(equipment);
     }
-
-    public Task UpdateAsync(
-        Equipment equipment,
-        CancellationToken cancellationToken = default)
-    {
-        int existingIndex = _equipment.FindIndex(
-            existing => existing.EquipmentId == equipment.EquipmentId);
-
-        if (existingIndex == -1)
-        {
-            throw new InvalidOperationException(
-                $"Equipment with ID {equipment.EquipmentId} does not exist.");
-        }
-
-        _equipment[existingIndex] = equipment;
-
-        return Task.CompletedTask;
-    }
 }

@@ -101,10 +101,6 @@ public sealed class BorrowEquipmentService
             borrowing,
             cancellationToken);
 
-        await _equipmentRepository.UpdateAsync(
-            equipment,
-            cancellationToken);
-
         // 9. Return the successful result.
         return BorrowResult.Success(borrowing);
     }
