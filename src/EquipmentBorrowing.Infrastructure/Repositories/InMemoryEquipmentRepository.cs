@@ -23,4 +23,12 @@ public sealed class InMemoryEquipmentRepository : IEquipmentRepository
 
         return Task.FromResult(equipment);
     }
+
+    public Task<IReadOnlyList<Equipment>> GetAllAsync(
+    CancellationToken cancellationToken = default)
+    {
+        IReadOnlyList<Equipment> equipment = _equipment.ToList();
+
+        return Task.FromResult(equipment);
+    }
 }

@@ -45,7 +45,7 @@ public sealed class InMemoryBorrowingRepository : IBorrowingRepository
         return Task.FromResult(activeBorrowings);
     }
 
-    public Task<Borrowing> GetActiveByStudentAndEquipmentAsync(
+    public Task<Borrowing?> GetActiveByStudentAndEquipmentAsync(
         int studentId,
         int equipmentId,
         CancellationToken cancellationToken = default)
@@ -56,8 +56,7 @@ public sealed class InMemoryBorrowingRepository : IBorrowingRepository
 
         var item = activeBorrowings.FirstOrDefault(
             x => x.Student.StudentId == studentId &&
-            x.Equipment.EquipmentId == equipmentId
-            );
+                 x.Equipment.EquipmentId == equipmentId);
 
         return Task.FromResult(item);
     }
