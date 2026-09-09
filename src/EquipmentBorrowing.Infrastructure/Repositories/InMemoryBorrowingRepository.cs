@@ -34,4 +34,31 @@ public sealed class InMemoryBorrowingRepository : IBorrowingRepository
 
         return Task.CompletedTask;
     }
+
+    public Task<IReadOnlyList<Borrowing>> GetActiveAsync(
+        CancellationToken cancellationToken = default)
+    {
+        IReadOnlyList<Borrowing> activeBorrowings = _borrowings
+            .Where(b => b.Status == BorrowingStatus.Active)
+            .ToList();
+
+        return Task.FromResult(activeBorrowings);
+    }
+
+    public Task<Borrowing> GetActiveByStudentAndEquipmentAsync(
+        int studentId,
+        int equipmentId,
+        CancellationToken cancellationToken = default)
+    {
+        IReadOnlyList<Borrowing> activeBorrowings = _borrowings
+           .Where(b => b.Status == BorrowingStatus.Active)
+           .ToList();
+
+        var item = activeBorrowings.FirstOrDefault(
+            x => x.Student.StudentId == studentId &&
+            x.Equipment.EquipmentId == equipmentId
+            );
+
+        return Task.FromResult(item);
+    }
 }

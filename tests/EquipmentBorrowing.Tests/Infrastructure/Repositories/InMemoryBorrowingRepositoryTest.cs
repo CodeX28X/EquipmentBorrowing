@@ -121,4 +121,50 @@ public class InMemoryBorrowingRepositoryTests
 		// Assert
 		Assert.Equal(1, count);
 	}
+
+    [Fact]
+    public async Task GetActiveAsync_ReturnsOnlyActiveBorrowings()
+    {
+        // Arrange
+        var repository = new InMemoryBorrowingRepository();
+
+        var student = new Student(
+            1,
+            "Juan Dela Cruz",
+            1,
+            true);
+
+        var equipment1 = new Equipment(
+            1,
+            "Laptop");
+
+        var equipment2 = new Equipment(
+            2,
+            "Projector");
+
+        var activeBorrowing = new Borrowing(
+            student,
+            equipment1,
+            DateTime.Now,
+            DateTime.Now.AddDays(3));
+
+        var returnedBorrowing = new Borrowing(
+            student,
+            equipment2,
+            DateTime.Now,
+            DateTime.Now.AddDays(3));
+
+        returnedBorrowing.MarkAsReturned();
+
+        await repository.AddAsync(activeBorrowing);
+        await repository.AddAsync(returnedBorrowing);
+
+        // Act
+        var result = await repository.GetActiveAsync();
+
+        // Assert
+        Assert.Single(result);
+        Assert.Contains(activeBorrowing, result);
+        Assert.DoesNotContain(returnedBorrowing, result);
+    }
 }
