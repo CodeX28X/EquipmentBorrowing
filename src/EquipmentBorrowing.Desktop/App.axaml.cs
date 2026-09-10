@@ -20,9 +20,7 @@ public partial class App : Avalonia.Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // ================================
             // SHARED REPOSITORIES
-            // ================================
 
             var studentRepository =
                 new InMemoryStudentRepository(
@@ -45,9 +43,7 @@ public partial class App : Avalonia.Application
             var borrowingRepository =
                 new InMemoryBorrowingRepository();
 
-            // ================================
-            // APPLICATION SERVICE
-            // ================================
+            // APPLICATION SERVICES
 
             var borrowEquipmentService =
                 new BorrowEquipmentService(
@@ -56,9 +52,23 @@ public partial class App : Avalonia.Application
                     borrowingRepository,
                     3);
 
-            // ================================
-            // BORROW VIEW MODEL
-            // ================================
+            var returnEquipmentService =
+                new ReturnEquipmentService(
+                    borrowingRepository);
+
+            // EQUIPMENT VIEW
+
+            var equipmentViewModel =
+                new EquipmentViewModel(
+                    equipmentRepository);
+
+            var equipmentView =
+                new EquipmentView
+                {
+                    DataContext = equipmentViewModel
+                };
+
+            // BORROW VIEW
 
             var borrowViewModel =
                 new BorrowViewModel(
@@ -66,25 +76,32 @@ public partial class App : Avalonia.Application
                     equipmentRepository,
                     borrowEquipmentService);
 
-            // ================================
-            // BORROW VIEW
-            // ================================
-
             var borrowView =
                 new BorrowView
                 {
                     DataContext = borrowViewModel
                 };
 
-            // ================================
-            // SHOW BORROW VIEW
-            // ================================
+            // ACTIVE BORROWINGS VIEW
+
+            var activeBorrowingsViewModel =
+                new ActiveBorrowingsViewModel(
+                    borrowingRepository,
+                    returnEquipmentService);
+
+            var activeBorrowingsView =
+                new ActiveBorrowingsView
+                {
+                    DataContext = activeBorrowingsViewModel
+                };
+
+            // MAIN WINDOW
 
             desktop.MainWindow =
-                new MainWindow
-                {
-                    Content = borrowView
-                };
+                new MainWindow(
+                    equipmentView,
+                    borrowView,
+                    activeBorrowingsView);
         }
 
         base.OnFrameworkInitializationCompleted();

@@ -88,12 +88,15 @@ public partial class BorrowViewModel : ObservableObject
             return;
         }
 
+        DateTime expectedReturnDate =
+            ExpectedReturnDate.Value.Date.AddDays(1).AddTicks(-1);
+
         BorrowResult result =
             await _borrowEquipmentService.BorrowAsync(
                 SelectedStudent.StudentId,
                 SelectedEquipment.EquipmentId,
                 DateTime.Now,
-                ExpectedReturnDate.Value);
+                expectedReturnDate);
 
         StatusMessage = result.Message;
 

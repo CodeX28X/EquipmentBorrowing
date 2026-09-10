@@ -1,0 +1,111 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
+    x:Class="EquipmentBorrowing.Desktop.Views.ActiveBorrowingsView"
+    x:DataType="vm:ActiveBorrowingsViewModel">
+
+	<StackPanel Margin="20" Spacing="15">
+
+		<TextBlock
+            Text="Active Borrowings"
+            FontSize="24"
+            FontWeight="Bold" />
+
+		<TextBlock
+            Text="Currently borrowed equipment"
+            Opacity="0.7" />
+
+		<Button
+            Content="Refresh Borrowings"
+            Command="{Binding LoadCommand}"
+            HorizontalAlignment="Left" />
+
+		<Border
+            BorderThickness="1"
+            CornerRadius="6"
+            Padding="10">
+
+			<ScrollViewer
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Auto">
+
+				<ItemsControl ItemsSource="{Binding ActiveBorrowings}">
+
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+
+							<Border
+                                BorderThickness="0,0,0,1"
+                                Padding="5"
+                                Margin="0,0,0,8">
+
+								<Grid ColumnDefinitions="180,180,150,150,120,140">
+
+									<StackPanel Grid.Column="0">
+										<TextBlock
+                                            Text="Student"
+                                            FontWeight="Bold" />
+										<TextBlock
+                                            Text="{Binding Student.StudentName}" />
+									</StackPanel>
+
+									<StackPanel Grid.Column="1">
+										<TextBlock
+                                            Text="Equipment"
+                                            FontWeight="Bold" />
+										<TextBlock
+                                            Text="{Binding Equipment.EquipmentName}" />
+									</StackPanel>
+
+									<StackPanel Grid.Column="2">
+										<TextBlock
+                                            Text="Borrowed"
+                                            FontWeight="Bold" />
+										<TextBlock
+                                            Text="{Binding BorrowedAt}" />
+									</StackPanel>
+
+									<StackPanel Grid.Column="3">
+										<TextBlock
+                                            Text="Expected Return"
+                                            FontWeight="Bold" />
+										<TextBlock
+                                            Text="{Binding ExpectedReturnDate}" />
+									</StackPanel>
+
+									<StackPanel Grid.Column="4">
+										<TextBlock
+                                            Text="Status"
+                                            FontWeight="Bold" />
+										<TextBlock
+                                            Text="{Binding Status}" />
+									</StackPanel>
+
+									<Button
+                                        Grid.Column="5"
+                                        Content="Return Equipment"
+                                        Command="{Binding $parent[UserControl].DataContext.ReturnEquipmentCommand}"
+                                        CommandParameter="{Binding}"
+                                        HorizontalAlignment="Left" />
+
+								</Grid>
+
+							</Border>
+
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+
+				</ItemsControl>
+
+			</ScrollViewer>
+
+		</Border>
+
+		<TextBlock
+            Text="{Binding StatusMessage}"
+            TextWrapping="Wrap" />
+
+	</StackPanel>
+
+</UserControl>
