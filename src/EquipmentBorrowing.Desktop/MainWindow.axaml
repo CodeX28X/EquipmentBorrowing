@@ -5,12 +5,4 @@
         Width="1000"
         Height="700">
 
-    <Grid>
-        <TextBlock
-            Text="Equipment Borrowing System"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            FontSize="28"/>
-    </Grid>
-
 </Window>

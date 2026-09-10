@@ -1,0 +1,97 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
+    xmlns:domain="using:EquipmentBorrowing.Domain.Entities"
+    x:Class="EquipmentBorrowing.Desktop.Views.EquipmentView"
+    x:DataType="vm:EquipmentViewModel">
+
+    <Grid
+        RowDefinitions="Auto,*"
+        Margin="24">
+
+        <StackPanel
+            Grid.Row="0"
+            Spacing="8">
+
+            <TextBlock
+                Text="Equipment"
+                FontSize="28"
+                FontWeight="Bold"/>
+
+            <Button
+                Content="Refresh Equipment"
+                Command="{Binding LoadEquipmentCommand}"
+                HorizontalAlignment="Left"/>
+
+        </StackPanel>
+
+        <Border
+            Grid.Row="1"
+            Margin="0,20,0,0"
+            BorderThickness="1"
+            Padding="12">
+
+            <Grid
+                RowDefinitions="Auto,*">
+
+                <Grid
+                    Grid.Row="0"
+                    ColumnDefinitions="100,*,150"
+                    Margin="0,0,0,10">
+
+                    <TextBlock
+                        Grid.Column="0"
+                        Text="ID"
+                        FontWeight="Bold"/>
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Text="Equipment Name"
+                        FontWeight="Bold"/>
+
+                    <TextBlock
+                        Grid.Column="2"
+                        Text="Availability"
+                        FontWeight="Bold"/>
+
+                </Grid>
+
+                <ItemsControl
+                    Grid.Row="1"
+                    ItemsSource="{Binding Equipment}">
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate
+                            x:DataType="domain:Equipment">
+
+                            <Grid
+                                ColumnDefinitions="100,*,150"
+                                Margin="0,6">
+
+                                <TextBlock
+                                    Grid.Column="0"
+                                    Text="{Binding EquipmentId}"/>
+
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Text="{Binding EquipmentName}"/>
+
+                                <TextBlock
+                                    Grid.Column="2"
+                                    Text="{Binding IsAvailable}"/>
+
+                            </Grid>
+
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+
+                </ItemsControl>
+
+            </Grid>
+
+        </Border>
+
+    </Grid>
+
+</UserControl>
