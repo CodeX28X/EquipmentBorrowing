@@ -40,7 +40,7 @@
                                 Padding="5"
                                 Margin="0,0,0,8">
 
-								<Grid ColumnDefinitions="180,180,150,150,120,140">
+								<Grid ColumnDefinitions="180,180,150,150,120,180">
 
 									<StackPanel Grid.Column="0">
 										<TextBlock
@@ -60,20 +60,20 @@
 
 									<StackPanel Grid.Column="2">
 										<TextBlock
-                                            Text="Borrowed"
-                                            FontWeight="Bold" />
+											Text="Borrowed"
+											FontWeight="Bold" />
 										<TextBlock
-                                            Text="{Binding BorrowedAt}" />
+											Text="{Binding BorrowedAt, StringFormat='{}{0:MM/dd/yyyy}'}" />
 									</StackPanel>
 
 									<StackPanel Grid.Column="3">
 										<TextBlock
-                                            Text="Expected Return"
-                                            FontWeight="Bold" />
+											Text="Expected Return"
+											FontWeight="Bold" />
 										<TextBlock
-                                            Text="{Binding ExpectedReturnDate}" />
+											Text="{Binding ExpectedReturnDate, StringFormat='{}{0:MM/dd/yyyy}'}" />
 									</StackPanel>
-
+									
 									<StackPanel Grid.Column="4">
 										<TextBlock
                                             Text="Status"
@@ -102,9 +102,17 @@
 
 		</Border>
 
-		<TextBlock
-            Text="{Binding StatusMessage}"
-            TextWrapping="Wrap" />
+		<Border
+			Padding="10"
+			BorderThickness="1"
+			CornerRadius="6"
+			Margin="0,10,0,0">
+
+			<TextBlock
+				Text="{Binding StatusMessage}"
+				TextWrapping="Wrap" />
+
+		</Border>
 
 	</StackPanel>
 

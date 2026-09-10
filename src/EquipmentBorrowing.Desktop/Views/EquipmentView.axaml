@@ -3,8 +3,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
     xmlns:domain="using:EquipmentBorrowing.Domain.Entities"
+    xmlns:converters="using:EquipmentBorrowing.Desktop.Converters"
     x:Class="EquipmentBorrowing.Desktop.Views.EquipmentView"
     x:DataType="vm:EquipmentViewModel">
+
+    <UserControl.Resources>
+        <converters:AvailabilityConverter x:Key="AvailabilityConverter"/>
+    </UserControl.Resources>
 
     <Grid
         RowDefinitions="Auto,*"
@@ -78,8 +83,8 @@
                                     Text="{Binding EquipmentName}"/>
 
                                 <TextBlock
-                                    Grid.Column="2"
-                                    Text="{Binding IsAvailable}"/>
+    Grid.Column="2"
+    Text="{Binding IsAvailable, Converter={StaticResource AvailabilityConverter}}"/>
 
                             </Grid>
 

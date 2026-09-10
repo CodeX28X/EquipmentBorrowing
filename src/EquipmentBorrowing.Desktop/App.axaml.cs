@@ -97,11 +97,14 @@ public partial class App : Avalonia.Application
 
             // MAIN WINDOW
 
-            desktop.MainWindow =
-                new MainWindow(
-                    equipmentView,
-                    borrowView,
-                    activeBorrowingsView);
+            var mainWindow = new MainWindow();
+
+            mainWindow.ConfigureViews(
+                equipmentView,
+                borrowView,
+                activeBorrowingsView);
+
+            desktop.MainWindow = mainWindow;
         }
 
         base.OnFrameworkInitializationCompleted();

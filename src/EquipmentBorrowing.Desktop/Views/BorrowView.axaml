@@ -122,13 +122,15 @@
 
 		<!-- RESULT -->
 		<Border
-            Grid.Row="5"
-            Margin="0,10,0,0"
-            Padding="15">
+			Grid.Row="5"
+			Padding="10"
+			BorderThickness="1"
+			CornerRadius="6"
+			Margin="0,10,0,0">
 
 			<TextBlock
-                Text="{Binding StatusMessage}"
-                TextWrapping="Wrap"/>
+				Text="{Binding StatusMessage}"
+				TextWrapping="Wrap" />
 
 		</Border>
 

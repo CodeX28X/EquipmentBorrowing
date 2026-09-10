@@ -64,6 +64,10 @@ public partial class BorrowViewModel : ObservableObject
         {
             Equipment.Add(item);
         }
+
+        SelectedStudent = null;
+        SelectedEquipment = null;
+        ExpectedReturnDate = null;
     }
 
 

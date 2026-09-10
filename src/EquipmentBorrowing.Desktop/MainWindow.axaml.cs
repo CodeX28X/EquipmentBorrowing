@@ -5,17 +5,20 @@ namespace EquipmentBorrowing.Desktop;
 
 public partial class MainWindow : Window
 {
-    private readonly EquipmentView _equipmentView;
-    private readonly BorrowView _borrowView;
-    private readonly ActiveBorrowingsView _activeBorrowingsView;
+    private EquipmentView? _equipmentView;
+    private BorrowView? _borrowView;
+    private ActiveBorrowingsView? _activeBorrowingsView;
 
-    public MainWindow(
+    public MainWindow()
+    {
+        InitializeComponent();
+    }
+
+    public void ConfigureViews(
         EquipmentView equipmentView,
         BorrowView borrowView,
         ActiveBorrowingsView activeBorrowingsView)
     {
-        InitializeComponent();
-
         _equipmentView = equipmentView;
         _borrowView = borrowView;
         _activeBorrowingsView = activeBorrowingsView;
@@ -27,20 +30,29 @@ public partial class MainWindow : Window
         object? sender,
         Avalonia.Interactivity.RoutedEventArgs e)
     {
-        ContentArea.Content = _equipmentView;
+        if (_equipmentView is not null)
+        {
+            ContentArea.Content = _equipmentView;
+        }
     }
 
     private void BorrowButton_Click(
         object? sender,
         Avalonia.Interactivity.RoutedEventArgs e)
     {
-        ContentArea.Content = _borrowView;
+        if (_borrowView is not null)
+        {
+            ContentArea.Content = _borrowView;
+        }
     }
 
     private void ActiveBorrowingsButton_Click(
         object? sender,
         Avalonia.Interactivity.RoutedEventArgs e)
     {
-        ContentArea.Content = _activeBorrowingsView;
+        if (_activeBorrowingsView is not null)
+        {
+            ContentArea.Content = _activeBorrowingsView;
+        }
     }
 }
