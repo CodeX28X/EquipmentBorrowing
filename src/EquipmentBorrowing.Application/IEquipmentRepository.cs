@@ -10,6 +10,5 @@ public interface IEquipmentRepository
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<Equipment>> GetAllAsync(
-    CancellationToken cancellationToken = default);
-
+        CancellationToken cancellationToken = default);
 }

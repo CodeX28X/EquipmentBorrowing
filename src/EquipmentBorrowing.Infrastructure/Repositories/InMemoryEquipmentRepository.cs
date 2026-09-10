@@ -25,7 +25,7 @@ public sealed class InMemoryEquipmentRepository : IEquipmentRepository
     }
 
     public Task<IReadOnlyList<Equipment>> GetAllAsync(
-    CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
     {
         IReadOnlyList<Equipment> equipment = _equipment.ToList();
 
