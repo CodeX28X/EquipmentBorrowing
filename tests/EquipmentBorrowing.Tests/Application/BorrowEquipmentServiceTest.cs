@@ -376,6 +376,6 @@ public class BorrowEquipmentServiceTest
 				expectedReturnDate));
 	}
 
- 
+   
 }
 

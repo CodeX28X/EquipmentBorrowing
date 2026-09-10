@@ -66,8 +66,9 @@ public partial class BorrowViewModel : ObservableObject
         }
     }
 
-    
-    public async Task BorrowEquipmentAsync()
+
+    [RelayCommand]
+    private async Task BorrowEquipmentAsync()
     {
         if (SelectedStudent is null)
         {

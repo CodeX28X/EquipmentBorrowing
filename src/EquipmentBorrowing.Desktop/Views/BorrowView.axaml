@@ -21,11 +21,22 @@
         RowSpacing="16">
 
 		<!-- TITLE -->
-		<TextBlock
-            Grid.Row="0"
-            Text="Borrow Equipment"
-            FontSize="28"
-            FontWeight="Bold"/>
+		<StackPanel
+			Grid.Row="0"
+			Orientation="Horizontal"
+			Spacing="15">
+
+			<TextBlock
+				Text="Borrow Equipment"
+				FontSize="28"
+				FontWeight="Bold"/>
+
+			<Button
+				Content="Refresh Data"
+				Command="{Binding LoadCommand}"
+				VerticalAlignment="Center"/>
+
+		</StackPanel>
 
 
 		<!-- STUDENT -->
@@ -53,65 +64,34 @@
 
 		</StackPanel>
 
+<!-- EQUIPMENT -->
+<StackPanel
+    Grid.Row="2"
+    Spacing="6">
 
-		<!-- EQUIPMENT -->
-		<StackPanel
-            Grid.Row="2"
-            Spacing="6">
+    <TextBlock
+        Text="Equipment"
+        FontWeight="Bold"/>
 
-			<TextBlock
-                Text="Equipment"
-                FontWeight="Bold"/>
-
-
-
-
-
-
-			<ComboBox
-    ItemsSource="{Binding Equipment}"
-    SelectedItem="{Binding SelectedEquipment}"
-    HorizontalAlignment="Stretch">
-
-				<ComboBox.ItemContainerTheme>
-					<ControlTheme TargetType="ComboBoxItem">
-
-						<!-- Disable taken equipment -->
-						<Setter Property="IsEnabled"
-								Value="{Binding IsAvailable}"/>
-
-						<!-- Make disabled equipment visually obvious -->
-						<Style Selector="^:disabled">
-							<Setter Property="Opacity"
-									Value="0.5"/>
-						</Style>
-
-					</ControlTheme>
-				</ComboBox.ItemContainerTheme>
-
-				<ComboBox.ItemTemplate>
-					<DataTemplate
-						x:DataType="domain:Equipment">
-
-						<TextBlock
-							Text="{Binding Converter={StaticResource EquipmentDisplayConverter}}"/>
-
-					</DataTemplate>
-				</ComboBox.ItemTemplate>
-
-			</ComboBox>
-			
-			
-			
-			
-			
-			
+    <ComboBox
+        ItemsSource="{Binding Equipment}"
+        SelectedItem="{Binding SelectedEquipment}"
+        HorizontalAlignment="Stretch">
 
 
+        <ComboBox.ItemTemplate>
+            <DataTemplate
+                x:DataType="domain:Equipment">
 
+                <TextBlock
+                    Text="{Binding Converter={StaticResource EquipmentDisplayConverter}}"/>
 
-		</StackPanel>
+            </DataTemplate>
+        </ComboBox.ItemTemplate>
 
+    </ComboBox>
+
+</StackPanel>
 
 		<!-- EXPECTED RETURN DATE -->
 		<StackPanel
