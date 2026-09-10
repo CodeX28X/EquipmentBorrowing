@@ -123,7 +123,7 @@ public class InMemoryBorrowingRepositoryTests
 	}
 
 	[Fact]
-	public async Task GetActiveAsyn_ReturnOnlyActiveBorrowing()
+	public async Task GetActiveAsync_ReturnOnlyActiveBorrowing()
 	{
 		//Arrange
 		var repository = new InMemoryBorrowingRepository();
