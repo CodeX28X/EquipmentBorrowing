@@ -92,8 +92,8 @@ public partial class BorrowViewModel : ObservableObject
             await _borrowEquipmentService.BorrowAsync(
                 SelectedStudent.StudentId,
                 SelectedEquipment.EquipmentId,
-                DateTime.Now,
-                ExpectedReturnDate.Value);
+                DateTime.Now.Date,
+                ExpectedReturnDate.Value.Date);
 
         StatusMessage = result.Message;
 
