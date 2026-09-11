@@ -656,13 +656,26 @@ Answer briefly:
 
 ### 1. Why should the View not call a repository directly?
 
+The View shouldn’t call a repository directly because its main purpose is to display the UI and handle user interaction. Calling repositories directly would mix the presentation layer with the data-access layer. This would make the application harder to maintain and test. The View should communicate with the ViewModel instead, which handles the interaction with the application layer.
+
 ### 2. Why should business rules not be implemented in the ViewModel?
+
+Business rules should not be implemented in the ViewModel because they do not belong there. The ViewModel should mainly handle presentation state, user input, commands, and user-facing messages. Keeping the rules in the Application layer allows the same borrowing logic to be reused by different interfaces. It also prevents the ViewModel from becoming too complicated and tightly coupled to the business logic.
 
 ### 3. What is the responsibility of the ViewModel?
 
-### 4. Why can the existing Application layer work without knowing that Avalonia is being used?
+The ViewModel connects the View to the application's functionality while keeping the UI separate from the business logic. It manages presentation state such as selected students, selected equipment, observable collections, and status messages. It will also handle commands that are triggered by the user and calls the appropriate application services based on what the user intends. This allows the View to focus mainly on layout, controls, and data binding.
+
+### 4. Why can the existing Application layer work without knowing that Avalonia is being used?\
+
+The existing Application layer is independent of Avalonia because it uses repository abstractions and business operations instead of UI code. Since Avalonia is merely a component of the presentation layer, the desktop interface can make use of the current application services.
 
 ### 5. What advantage is gained from registering dependencies in one composition point?
 
+The advantage gained from registering dependencies in one composition point is managing and replacing dependencies is made simpler by centralizing object creation. In order to maintain the application state, this project also makes sure that shared in-memory repository instances are used throughout.
+
 ### 6. If the in-memory repository were replaced by SQLite later, which parts of the current interface should remain largely unchanged?
+
+The parts of the current interface that should remain largely unchanged are ViewModels, Views, repository interfaces, Domain entities, and Application services.The primary modification would be in the Infrastructure layer, where SQLite-based implementations would take the place of the in-memory repository implementations
+
 
