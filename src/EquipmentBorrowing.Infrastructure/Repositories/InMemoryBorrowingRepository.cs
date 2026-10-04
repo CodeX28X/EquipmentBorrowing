@@ -14,6 +14,16 @@ public sealed class InMemoryBorrowingRepository : IBorrowingRepository
         _borrowings = borrowings?.ToList() ?? new List<Borrowing>();
     }
 
+
+    public Task SaveChangesAsync(
+    CancellationToken cancellationToken = default)
+    {
+        return Task.CompletedTask;
+    }
+
+
+
+
     public Task<int> CountActiveByStudentAsync(
         int studentId,
         CancellationToken cancellationToken = default)

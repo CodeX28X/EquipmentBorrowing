@@ -19,4 +19,7 @@ public interface IBorrowingRepository
         int studentId,
         int equipmentId,
         CancellationToken cancellationToken = default);
+
+    Task SaveChangesAsync(
+        CancellationToken cancellationToken = default);
 }

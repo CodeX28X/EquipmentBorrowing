@@ -32,6 +32,8 @@ public sealed class ReturnEquipmentService
         borrowing.MarkAsReturned();
         borrowing.Equipment.MarkAsAvailable();
 
+        await _borrowingRepository.SaveChangesAsync(cancellationToken);
+
         return ReturnResult.Success(borrowing);
     }
 }

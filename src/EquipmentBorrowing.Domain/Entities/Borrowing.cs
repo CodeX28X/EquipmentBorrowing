@@ -10,6 +10,13 @@ public class Borrowing
     public DateTime ExpectedReturnDate { get; }
     public BorrowingStatus Status { get; private set; }
 
+
+    // EF Core constructor
+    private Borrowing()
+    {
+    }
+
+
     public Borrowing(
         Student student,
         Equipment equipment,
