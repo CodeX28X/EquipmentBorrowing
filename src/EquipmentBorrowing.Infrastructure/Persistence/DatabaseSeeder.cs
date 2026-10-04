@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EquipmentBorrowing.Infrastructure.Persistence;
 
+
 public static class DatabaseSeeder
 {
     public static async Task InitializeAsync(
@@ -18,11 +19,17 @@ public static class DatabaseSeeder
         // ---------------------------------------------------------
 
         var students = new[]
+
+
+
+
         {
             new Student(1, "Juan Dela Cruz", 3, true),
             new Student(2, "Maria Santos", 2, true),
             new Student(3, "Pedro Reyes", 1, false),
             new Student(4, "Ana Garcia", 4, true)
+
+
         };
 
         foreach (var student in students)
