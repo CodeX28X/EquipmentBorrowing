@@ -2,12 +2,7 @@
 
 ## Overview
 
-The Equipment Borrowing System is a desktop application for managing the borrowing and returning of campus equipment by students.
-
-The system is implemented using a layered architecture that separates domain logic, application use cases, infrastructure concerns, and desktop presentation. The current implementation includes domain entities and business rules, repository abstractions, application services, in-memory repository implementations, an Avalonia desktop application, a console demonstration application, and automated tests.
-
-The desktop application uses **Avalonia UI** and **MVVM** to provide a graphical interface for viewing equipment, borrowing equipment, and managing active borrowings and returns.
-
+TA desktop application for managing student equipment borrowing and returning. The application was developed using C#, .NET 10, Avalonia UI, and follows a layered architecture with Domain, Application, Infrastructure, and Desktop projects.
 ## Solution Structure
 
 ```text
@@ -38,10 +33,26 @@ EquipmentBorrowing/
 │   │       └── ReturnResult.cs
 │   │
 │   ├── EquipmentBorrowing.Infrastructure/
-│   │   └── Repositories/
-│   │       ├── InMemoryBorrowingRepository.cs
-│   │       ├── InMemoryEquipmentRepository.cs
-│   │       └── InMemoryStudentRepository.cs
+│   │   ├── Migrations/
+│   │   │   ├── 20261003141009_InitialCreate.cs
+│   │   │   ├── 20261003141009_InitialCreate.Designer.cs
+│   │   │   └── EquipmentBorrowingDbContextModelSnapshot.cs
+│   │   ├── Persistence/
+│   │   │   ├── Configurations/
+│   │   │   │   ├── BorrowingConfiguration.cs
+│   │   │   │   ├── EquipmentConfiguration.cs
+│   │   │   │   └── StudentConfiguration.cs
+│   │   │   ├── DatabaseSeeder.cs
+│   │   │   ├── EquipmentBorrowingDbContext.cs
+│   │   │   └── EquipmentBorrowingDbContextFactory.cs
+│   │   ├── Repositories/
+│   │   │   ├── EfBorrowingRepository.cs
+│   │   │   ├── EfEquipmentRepository.cs
+│   │   │   ├── EfStudentRepository.cs
+│   │   │   ├── InMemoryBorrowingRepository.cs
+│   │   │   ├── InMemoryEquipmentRepository.cs
+│   │   │   └── InMemoryStudentRepository.cs
+│   │   └── EquipmentBorrowing.Infrastructure.csproj
 │   │
 │   ├── EquipmentBorrowing.Console/
 │   │   ├── EquipmentBorrowing.Console.csproj
@@ -110,13 +121,96 @@ Application services coordinate the system's business operations using repositor
 
 ### Infrastructure
 
-The Infrastructure layer contains concrete implementations of the repository abstractions.
+Activity 3 replaced the previous in-memory storage with SQLite using Entity Framework Core.
 
-It currently provides:
+The database contains three main tables:
 
-* `InMemoryStudentRepository`
-* `InMemoryEquipmentRepository`
-* `InMemoryBorrowingRepository`
+STUDENTS
+- StudentId (PK)
+- StudentName
+- StudentYear
+- IsAllowedToBorrow
+
+EQUIPMENT
+- EquipmentId (PK)
+- EquipmentName
+- IsAvailable
+
+BORROWINGS
+- BorrowingId (PK)
+- StudentId (FK)
+- EquipmentId (FK)
+- BorrowedAt
+- ExpectedReturnDate
+- Status
+
+Relationships:
+
+STUDENTS 1 -------- * BORROWINGS * -------- 1 EQUIPMENT
+
+Entity configurations define the primary keys, required fields, unique indexes, foreign keys, and indexes.
+
+Entity Framework Core
+
+The project uses:
+
+EquipmentBorrowingDbContext
+StudentConfiguration
+EquipmentConfiguration
+BorrowingConfiguration
+EfStudentRepository
+EfEquipmentRepository
+EfBorrowingRepository
+
+The repositories use asynchronous EF Core operations such as ToListAsync(), FirstOrDefaultAsync(), CountAsync(), and SaveChangesAsync().
+
+Display-only queries use AsNoTracking() where entity modification is not required.
+
+Database Migration
+
+The initial migration is:
+
+InitialCreate
+
+The migration creates the Students, Equipment, and Borrowings tables together with their keys, relationships, and indexes.
+
+The application applies existing migrations during startup and checks whether seed records already exist before inserting them.
+
+Seed Data
+
+The application contains initial student and equipment records for testing.
+
+Students:
+
+Juan Dela Cruz
+Maria Santos
+Pedro Reyes
+Ana Garcia
+
+Equipment:
+
+Laptop 01
+Laptop 02
+Projector 01
+Camera 01
+
+An initial active borrowing is also created for testing the unavailable equipment scenario.
+
+Database Queries
+
+Required SQL examples are stored in:
+
+docs/database-queries.sql
+
+The file contains queries for:
+
+Retrieving students
+Retrieving equipment
+Filtering available equipment
+Joining active borrowings with students and equipment
+Counting active borrowings
+Updating equipment availability
+Retrieving a student's borrowing records
 
 The Infrastructure layer depends on the Application and Domain layers.
 
@@ -233,7 +327,7 @@ EquipmentViewModel
     ↓
 IEquipmentRepository
     ↓
-InMemoryEquipmentRepository
+EfEquipmentRepository
 ```
 
 For borrowing:
@@ -249,7 +343,7 @@ IStudentRepository
 IEquipmentRepository
 IBorrowingRepository
     ↓
-InMemory repositories
+Ef repositories
 ```
 
 For returning equipment:
@@ -263,7 +357,7 @@ ReturnEquipmentService
     ↓
 IBorrowingRepository
     ↓
-InMemoryBorrowingRepository
+EfBorrowingRepository
 ```
 
 The Views do not access repositories directly, and business rules remain in the Domain and Application layers.
@@ -505,9 +599,9 @@ Repository Interfaces Used:
 - IBorrowingRepository
 
 Infrastructure Implementations Used:
-- InMemoryStudentRepository
-- InMemoryEquipmentRepository
-- InMemoryBorrowingRepository
+- EfStudentRepository
+- EfEquipmentRepository
+- EfBorrowingRepository
 ```
 
 The `BorrowEquipmentService.BorrowAsync()` method coordinates the equipment borrowing operation.
@@ -532,7 +626,7 @@ Repository Interface Used:
 - IBorrowingRepository
 
 Infrastructure Implementation Used:
-- InMemoryBorrowingRepository
+- EfBorrowingRepository
 ```
 
 The `ReturnEquipmentService.ReturnAsync()` method coordinates the equipment return operation.
@@ -678,4 +772,32 @@ The advantage gained from registering dependencies in one composition point is m
 
 The parts of the current interface that should remain largely unchanged are ViewModels, Views, repository interfaces, Domain entities, and Application services.The primary modification would be in the Infrastructure layer, where SQLite-based implementations would take the place of the in-memory repository implementations
 
+### 13. Activity 3 Architectural Reflection
 
+### 1. Why did the application not need to be completely rewritten when SQLite was introduced?
+
+Because the app was already set up with Clean Architecture and the Dependency Inversion Principle. The core business logic and ViewModels only care about repository interfaces (IStudentRepository, IEquipmentRepository, IBorrowingRepository), not how data is actually stored. Swapping the in-memory lists for SQLite was just a matter of swapping out the implementation inside the Infrastructure layer.
+
+### 2. Why should the ViewModel not use DbContext directly?
+
+ViewModels are meant to handle UI logic, not query a database. If you put DbContext directly inside a ViewModel, you end up tying your presentation layer straight to Entity Framework. That makes the code messier, ruins the separation of concerns, and makes unit testing the ViewModels almost impossible without spinning up a full database.
+
+### 3. What responsibility does the repository implementation now perform?
+
+It acts as the middleman between the application layer and the database. It takes standard repository method calls, turns them into EF Core LINQ queries, runs them through the EquipmentBorrowingDbContext, and hands back clean domain entities to the application.
+
+### 4. What is the purpose of an EF Core migration?
+
+It acts like version control for your database schema. Instead of manually creating tables or running raw SQL scripts, migrations keep track of code-first model changes and automatically create or update the SQLite database tables so everything stays in sync.
+
+### 5.  Why are foreign keys important in the borrowing database?
+
+They keep your data clean and valid (referential integrity). Having StudentId and EquipmentId as foreign keys in the Borrowings table makes sure nobody can create a borrowing record for a student or equipment item that doesn't actually exist in the database.
+
+### 6.  Why can a read-only query benefit from AsNoTracking()?
+
+By default, EF Core tracks every entity it fetches so it can detect changes later. When you're just fetching data to display on a screen, turning on AsNoTracking() tells EF Core to skip tracking those objects. That saves memory, lowers CPU overhead, and speeds up the query.
+
+### 7.  What would happen to the rest of the application if the SQLite implementation were replaced later by another database provider?
+
+Practically nothing outside of Infrastructure. You’d keep all your Views, ViewModels, Domain entities, and Application services untouched. You’d only need to swap the database provider package in the Infrastructure layer (like switching .UseSqlite() to PostgreSQL or SQL Server) and run fresh migrations.
