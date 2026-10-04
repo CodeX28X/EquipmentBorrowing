@@ -5,14 +5,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EquipmentBorrowing.Infrastructure.Repositories;
 
+
+
 public sealed class EfStudentRepository : IStudentRepository
 {
     private readonly EquipmentBorrowingDbContext _dbContext;
+
+
 
     public EfStudentRepository(EquipmentBorrowingDbContext dbContext)
     {
         _dbContext = dbContext;
     }
+
+
 
     public async Task<Student?> GetByIdAsync(
         int studentId,
@@ -23,6 +29,8 @@ public sealed class EfStudentRepository : IStudentRepository
                 student => student.StudentId == studentId,
                 cancellationToken);
     }
+
+
 
     public async Task<IReadOnlyList<Student>> GetAllAsync(
         CancellationToken cancellationToken = default)
