@@ -83,8 +83,8 @@
                                     Text="{Binding EquipmentName}"/>
 
                                 <TextBlock
-    Grid.Column="2"
-    Text="{Binding IsAvailable, Converter={StaticResource AvailabilityConverter}}"/>
+                                    Grid.Column="2"
+                                    Text="{Binding IsAvailable, Converter={StaticResource AvailabilityConverter}}"/>
 
                             </Grid>
 

@@ -1,18 +1,35 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
+﻿
+using Microsoft.EntityFrameworkCore;
 
 namespace EquipmentBorrowing.Infrastructure.Persistence;
 
-public sealed class EquipmentBorrowingDbContextFactory
-    : IDesignTimeDbContextFactory<EquipmentBorrowingDbContext>
+/// <summary>
+/// Creates independent database contexts for runtime operations.
+/// The caller is responsible for disposing each created context.
+/// </summary>
+public sealed class EquipmentBorrowingContextFactory
+    : IDbContextFactory<EquipmentBorrowingDbContext>
 {
-    public EquipmentBorrowingDbContext CreateDbContext(string[] args)
+    private readonly DbContextOptions<EquipmentBorrowingDbContext>
+        _options;
+
+    public EquipmentBorrowingContextFactory(
+        DbContextOptions<EquipmentBorrowingDbContext> options)
     {
-        var optionsBuilder =
-            new DbContextOptionsBuilder<EquipmentBorrowingDbContext>();
+        _options = options
+            ?? throw new ArgumentNullException(nameof(options));
+    }
 
-        optionsBuilder.UseSqlite("Data Source=EquipmentBorrowing.db");
+    public EquipmentBorrowingDbContext CreateDbContext()
+    {
+        return new EquipmentBorrowingDbContext(_options);
+    }
 
-        return new EquipmentBorrowingDbContext(optionsBuilder.Options);
+    public Task<EquipmentBorrowingDbContext> CreateDbContextAsync(
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Task.FromResult(CreateDbContext());
     }
 }

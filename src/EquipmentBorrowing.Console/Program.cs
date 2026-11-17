@@ -1,73 +1,75 @@
-﻿using EquipmentBorrowing.Application;
+﻿
+using EquipmentBorrowing.Application;
 using EquipmentBorrowing.Application.Services;
 using EquipmentBorrowing.Domain.Entities;
 using EquipmentBorrowing.Infrastructure.Repositories;
 
-// 1. Create sample data
+// Create sample data using the Lab 4 constructors.
 
-Student student = new Student(
+var student = new Student(
     studentId: 1,
+    studentNumber: "STU-0001",
     studentName: "Juan Dela Cruz",
-    studentYear: 2,
-    isAllowedToBorrow: true);
+    studentYear: 2);
 
-Equipment equipment = new Equipment(
+var equipment = new Equipment(
     equipmentId: 1,
+    equipmentIdentifier: "LAP-001",
     equipmentName: "Laptop");
 
-// 2. Create repository implementations
+// Use in-memory repositories for this console demonstration.
 
 IStudentRepository studentRepository =
-    new InMemoryStudentRepository(
-        new[] { student });
+    new InMemoryStudentRepository(new[] { student });
 
 IEquipmentRepository equipmentRepository =
-    new InMemoryEquipmentRepository(
-        new[] { equipment });
+    new InMemoryEquipmentRepository(new[] { equipment });
 
 IBorrowingRepository borrowingRepository =
     new InMemoryBorrowingRepository();
 
+var borrowingService = new BorrowEquipmentService(
+    studentRepository,
+    equipmentRepository,
+    borrowingRepository,
+    maximumActiveBorrowings: 3);
 
-// 3. Create the application service
+// Lab 4 uses local calendar dates.
 
-BorrowEquipmentService borrowingService =
-    new BorrowEquipmentService(
-        studentRepository,
-        equipmentRepository,
-        borrowingRepository,
-        maximumActiveBorrowings: 3);
+var manilaTimeZone =
+    TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
 
-// 4. Execute a successful borrowing request
+var manilaNow = TimeZoneInfo.ConvertTime(
+    DateTimeOffset.UtcNow,
+    manilaTimeZone);
+
+var checkoutDate = DateOnly.FromDateTime(
+    manilaNow.DateTime);
+
+var expectedReturnDate = checkoutDate.AddDays(7);
 
 Console.WriteLine("=== Equipment Borrowing System ===");
 Console.WriteLine();
 
 Console.WriteLine("Attempting to borrow equipment...");
 
-BorrowResult result =
-    await borrowingService.BorrowAsync(
-        studentId: 1,
-        equipmentId: 1,
-        borrowedAt: DateTime.Now,
-        expectedReturnDate: DateTime.Now.AddDays(7));
+BorrowResult result = await borrowingService.BorrowAsync(
+    studentId: student.StudentId,
+    equipmentId: equipment.EquipmentId,
+    borrowedAt: checkoutDate.ToDateTime(TimeOnly.MinValue),
+    expectedReturnDate:
+        expectedReturnDate.ToDateTime(TimeOnly.MinValue));
 
 Console.WriteLine($"Success: {result.IsSuccess}");
 Console.WriteLine($"Message: {result.Message}");
 
-// 5. Display resulting domain state
-
 Console.WriteLine();
 Console.WriteLine("=== Resulting State ===");
 
-Console.WriteLine(
-    $"Student: {student.StudentName}");
-
-Console.WriteLine(
-    $"Equipment: {equipment.EquipmentName}");
-
-Console.WriteLine(
-    $"Equipment Available: {equipment.IsAvailable}");
+Console.WriteLine($"Student: {student.StudentName}");
+Console.WriteLine($"Student Number: {student.StudentNumber}");
+Console.WriteLine($"Equipment: {equipment.EquipmentName}");
+Console.WriteLine($"Equipment Available: {equipment.IsAvailable}");
 
 if (result.Borrowing is not null)
 {
@@ -75,24 +77,23 @@ if (result.Borrowing is not null)
         $"Borrowing Status: {result.Borrowing.Status}");
 
     Console.WriteLine(
-        $"Borrowed At: {result.Borrowing.BorrowedAt}");
+        $"Checkout Date: {result.Borrowing.BorrowedAt}");
 
     Console.WriteLine(
-        $"Expected Return Date: {result.Borrowing.ExpectedReturnDate}");
+        $"Expected Return: {result.Borrowing.ExpectedReturnDate}");
 }
 
-// 6. Execute an unsuccessful borrowing request
+// Verify duplicate borrowing is rejected.
 
 Console.WriteLine();
 Console.WriteLine("=== Second Borrowing Attempt ===");
-Console.WriteLine();
 
-BorrowResult secondResult =
-    await borrowingService.BorrowAsync(
-        studentId: 1,
-        equipmentId: 1,
-        borrowedAt: DateTime.Now,
-        expectedReturnDate: DateTime.Now.AddDays(7));
+BorrowResult secondResult = await borrowingService.BorrowAsync(
+    studentId: student.StudentId,
+    equipmentId: equipment.EquipmentId,
+    borrowedAt: checkoutDate.ToDateTime(TimeOnly.MinValue),
+    expectedReturnDate:
+        expectedReturnDate.ToDateTime(TimeOnly.MinValue));
 
 Console.WriteLine($"Success: {secondResult.IsSuccess}");
 Console.WriteLine($"Message: {secondResult.Message}");

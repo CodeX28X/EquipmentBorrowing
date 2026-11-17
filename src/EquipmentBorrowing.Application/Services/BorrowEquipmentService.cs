@@ -90,8 +90,9 @@ public sealed class BorrowEquipmentService
         Borrowing borrowing = new Borrowing(
             student,
             equipment,
-            borrowedAt,
-            expectedReturnDate);
+            DateOnly.FromDateTime(borrowedAt),
+            DateOnly.FromDateTime(expectedReturnDate));
+
 
         // 7. Change the equipment's domain state.
         equipment.MarkAsBorrowed();

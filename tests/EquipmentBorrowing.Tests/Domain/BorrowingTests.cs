@@ -1,3 +1,4 @@
+
 using EquipmentBorrowing.Domain.Entities;
 using EquipmentBorrowing.Domain.Enums;
 
@@ -5,87 +6,135 @@ namespace EquipmentBorrowing.Tests.Domain;
 
 public class BorrowingTests
 {
-    private static Student CreateStudent()
-    {
-        return new Student(
-            1,
-            "Juan Dela Cruz",
-            2,
-            true);
-    }
+    private static Student CreateStudent() =>
+        new Student(1, "STU-001", "Juan Dela Cruz");
 
-    private static Equipment CreateEquipment()
-    {
-        return new Equipment(
-            1,
-            "Laptop");
-    }
+    private static Equipment CreateEquipment() =>
+        new Equipment(1, "LAP-001", "Laptop");
+
+    private static Borrowing CreateBorrowing() =>
+        new Borrowing(
+            CreateStudent(),
+            CreateEquipment(),
+            new DateOnly(2026, 11, 18),
+            new DateOnly(2026, 11, 25));
 
     [Fact]
-    public void Constructor_WithValidInformation_CreatesActiveBorrowing()
+    public void ValidBorrowing_IsInitiallyActive()
     {
         var student = CreateStudent();
         var equipment = CreateEquipment();
-
-        var borrowedAt = new DateTime(2026, 8, 27, 10, 0, 0);
-        var expectedReturnDate = new DateTime(2026, 9, 3, 10, 0, 0);
 
         var borrowing = new Borrowing(
             student,
             equipment,
-            borrowedAt,
-            expectedReturnDate);
+            new DateOnly(2026, 11, 18),
+            new DateOnly(2026, 11, 25));
 
+        Assert.Equal(student.StudentId, borrowing.StudentId);
+        Assert.Equal(equipment.EquipmentId, borrowing.EquipmentId);
         Assert.Same(student, borrowing.Student);
         Assert.Same(equipment, borrowing.Equipment);
-        Assert.Equal(borrowedAt, borrowing.BorrowedAt);
-        Assert.Equal(expectedReturnDate, borrowing.ExpectedReturnDate);
         Assert.Equal(BorrowingStatus.Active, borrowing.Status);
+        Assert.Null(borrowing.ActualReturnDate);
     }
 
     [Fact]
-    public void Constructor_WhenExpectedReturnDateIsEarlierThanBorrowedAt_ThrowsException()
+    public void MissingStudent_IsRejected()
     {
-        var student = CreateStudent();
-        var equipment = CreateEquipment();
+        Assert.Throws<ArgumentNullException>(() =>
+            new Borrowing(
+                null!,
+                CreateEquipment(),
+                new DateOnly(2026, 11, 18),
+                new DateOnly(2026, 11, 25)));
+    }
 
-        var borrowedAt = new DateTime(2026, 8, 27);
-        var expectedReturnDate = new DateTime(2026, 8, 26);
+    [Fact]
+    public void MissingEquipment_IsRejected()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            new Borrowing(
+                CreateStudent(),
+                null!,
+                new DateOnly(2026, 11, 18),
+                new DateOnly(2026, 11, 25)));
+    }
 
+    [Fact]
+    public void EarlierExpectedReturn_IsRejected()
+    {
         Assert.Throws<ArgumentException>(() =>
             new Borrowing(
-                student,
-                equipment,
-                borrowedAt,
-                expectedReturnDate));
+                CreateStudent(),
+                CreateEquipment(),
+                new DateOnly(2026, 11, 18),
+                new DateOnly(2026, 11, 17)));
     }
 
     [Fact]
-    public void MarkAsReturned_WhenBorrowingIsActive_ChangesStatusToReturned()
+    public void SameDayExpectedReturn_IsRejected()
     {
-        var borrowing = new Borrowing(
-            CreateStudent(),
-            CreateEquipment(),
-            new DateTime(2026, 8, 27),
-            new DateTime(2026, 9, 3));
+        Assert.Throws<ArgumentException>(() =>
+            new Borrowing(
+                CreateStudent(),
+                CreateEquipment(),
+                new DateOnly(2026, 11, 18),
+                new DateOnly(2026, 11, 18)));
+    }
 
-        borrowing.MarkAsReturned();
+    [Fact]
+    public void ReturningActiveBorrowing_RecordsActualDate()
+    {
+        var borrowing = CreateBorrowing();
+
+        borrowing.MarkAsReturned(
+            new DateOnly(2026, 11, 20));
+
+        Assert.Equal(BorrowingStatus.Returned, borrowing.Status);
+        Assert.Equal(
+            new DateOnly(2026, 11, 20),
+            borrowing.ActualReturnDate);
+    }
+
+    [Fact]
+    public void EarlyReturn_IsAllowed()
+    {
+        var borrowing = CreateBorrowing();
+
+        borrowing.MarkAsReturned(
+            new DateOnly(2026, 11, 18));
 
         Assert.Equal(BorrowingStatus.Returned, borrowing.Status);
     }
 
     [Fact]
-    public void MarkAsReturned_WhenBorrowingIsAlreadyReturned_ThrowsException()
+    public void ReturnBeforeCheckout_IsRejected()
     {
-        var borrowing = new Borrowing(
-            CreateStudent(),
-            CreateEquipment(),
-            new DateTime(2026, 8, 27),
-            new DateTime(2026, 9, 3));
+        var borrowing = CreateBorrowing();
 
-        borrowing.MarkAsReturned();
+        Assert.Throws<ArgumentException>(() =>
+            borrowing.MarkAsReturned(
+                new DateOnly(2026, 11, 17)));
+
+        Assert.Equal(BorrowingStatus.Active, borrowing.Status);
+        Assert.Null(borrowing.ActualReturnDate);
+    }
+
+    [Fact]
+    public void RepeatedReturn_IsRejected()
+    {
+        var borrowing = CreateBorrowing();
+
+        borrowing.MarkAsReturned(
+            new DateOnly(2026, 11, 20));
 
         Assert.Throws<InvalidOperationException>(() =>
-            borrowing.MarkAsReturned());
+            borrowing.MarkAsReturned(
+                new DateOnly(2026, 11, 21)));
+
+        Assert.Equal(
+            new DateOnly(2026, 11, 20),
+            borrowing.ActualReturnDate);
     }
 }

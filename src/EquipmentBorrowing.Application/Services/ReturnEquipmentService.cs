@@ -29,7 +29,19 @@ public sealed class ReturnEquipmentService
                 "No active borrowing was found for the specified student and equipment.");
         }
 
-        borrowing.MarkAsReturned();
+
+        var manilaTimeZone =
+            TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+
+        var localNow = TimeZoneInfo.ConvertTime(
+            DateTimeOffset.UtcNow,
+            manilaTimeZone);
+
+        var actualReturnDate = DateOnly.FromDateTime(
+            localNow.DateTime);
+
+        borrowing.MarkAsReturned(actualReturnDate);
+
         borrowing.Equipment.MarkAsAvailable();
 
         await _borrowingRepository.SaveChangesAsync(cancellationToken);

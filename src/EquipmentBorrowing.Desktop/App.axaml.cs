@@ -1,25 +1,14 @@
 
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Controls.Documents;
-using Avalonia.Controls.Shapes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Platform;
-using Avalonia.Rendering.Composition;
-using EquipmentBorrowing.Application.Services;
 using EquipmentBorrowing.Desktop.ViewModels;
 using EquipmentBorrowing.Desktop.Views;
-using EquipmentBorrowing.Domain.Entities;
 using EquipmentBorrowing.Infrastructure.Persistence;
 using EquipmentBorrowing.Infrastructure.Repositories;
+using EquipmentBorrowing.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.Intrinsics.X86;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EquipmentBorrowing.Desktop;
 
@@ -32,100 +21,72 @@ public partial class App : Avalonia.Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        if (ApplicationLifetime
+            is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // ---------------------------------------------------------
-            // DATABASE
-            // ---------------------------------------------------------
+            const string connectionVariable =
+                "EQUIPMENTBORROWING_CONNECTION_STRING";
 
-            var dbOptions =
-                new DbContextOptionsBuilder<EquipmentBorrowingDbContext>()
-                    .UseSqlite("Data Source=EquipmentBorrowing.db")
-                    .Options;
+            string? connectionString =
+                Environment.GetEnvironmentVariable(
+                    connectionVariable);
 
-            // Initialize database and seed data.
-            using (var initializationContext =
-                   new EquipmentBorrowingDbContext(dbOptions))
+            if (string.IsNullOrWhiteSpace(connectionString))
             {
-                DatabaseSeeder
-                    .InitializeAsync(initializationContext)
-                    .GetAwaiter()
-                    .GetResult();
+                throw new InvalidOperationException(
+                    $"Missing {connectionVariable}. " +
+                    "Configure the PostgreSQL connection string.");
             }
 
-            // ---------------------------------------------------------
-            // SHARED APPLICATION DbContext
-            // ---------------------------------------------------------
+            var options =
+                new DbContextOptionsBuilder<
+                    EquipmentBorrowingDbContext>()
+                    .UseNpgsql(connectionString)
+                    .Options;
 
-            var dbContext =
-                new EquipmentBorrowingDbContext(dbOptions);
+            var contextFactory =
+                new EquipmentBorrowingContextFactory(options);
 
-            // ---------------------------------------------------------
-            // EF REPOSITORIES
-            // ---------------------------------------------------------
+            // Independent read-only repositories.
+            var studentReader =
+                new EfStudentReadRepository(contextFactory);
 
-            var studentRepository =
-                new EfStudentRepository(dbContext);
+            var equipmentReader =
+                new EfEquipmentReadRepository(contextFactory);
 
-            var equipmentRepository =
-                new EfEquipmentRepository(dbContext);
+            var borrowingReader =
+                new EfActiveBorrowingsReader(contextFactory);
 
-            var borrowingRepository =
-                new EfBorrowingRepository(dbContext);
+            // Transaction-safe write service.
+            var atomicBorrowingService =
+                new PostgreSqlAtomicBorrowingService(contextFactory);
 
-            // ---------------------------------------------------------
-            // APPLICATION SERVICES
-            // ---------------------------------------------------------
-
-            var borrowEquipmentService =
-                new BorrowEquipmentService(
-                    studentRepository,
-                    equipmentRepository,
-                    borrowingRepository,
-                    3);
-
-            var returnEquipmentService =
-                new ReturnEquipmentService(
-                    borrowingRepository);
-
-            // ---------------------------------------------------------
-            // EQUIPMENT VIEW
-            // ---------------------------------------------------------
-
+            // Equipment catalog.
             var equipmentViewModel =
-                new EquipmentViewModel(
-                    equipmentRepository);
+                new EquipmentViewModel(equipmentReader);
 
-            var equipmentView =
-                new EquipmentView
-                {
-                    DataContext = equipmentViewModel
-                };
+            var equipmentView = new EquipmentView
+            {
+                DataContext = equipmentViewModel
+            };
 
-            // ---------------------------------------------------------
-            // BORROW VIEW
-            // ---------------------------------------------------------
-
+            // Borrow equipment.
             var borrowViewModel =
                 new BorrowViewModel(
-                    studentRepository,
-                    equipmentRepository,
-                    borrowEquipmentService);
+                    studentReader,
+                    equipmentReader,
+                    atomicBorrowingService);
 
-            var borrowView =
-                new BorrowView
-                {
-                    DataContext = borrowViewModel
-                };
+            var borrowView = new BorrowView
+            {
+                DataContext = borrowViewModel
+            };
 
-            // ---------------------------------------------------------
-            // ACTIVE BORROWINGS VIEW
-            // ---------------------------------------------------------
-
+            // Active borrowings and returns.
             var activeBorrowingsViewModel =
                 new ActiveBorrowingsViewModel(
-                    borrowingRepository,
-                    returnEquipmentService);
+                    borrowingReader,
+                    atomicBorrowingService);
 
             var activeBorrowingsView =
                 new ActiveBorrowingsView
@@ -133,24 +94,34 @@ public partial class App : Avalonia.Application
                     DataContext = activeBorrowingsViewModel
                 };
 
-            // ---------------------------------------------------------
-            // MAIN WINDOW
-            // ---------------------------------------------------------
+            // Student Managaemnt.
 
+            var studentManagementService =
+                 new PostgreSqlStudentManagementService(contextFactory);
+
+            var studentManagementViewModel =
+                new StudentManagementViewModel(
+                    studentReader,
+                    studentManagementService);
+
+            var studentManagementView =
+                new StudentManagementView
+                {
+                    DataContext = studentManagementViewModel
+                };
+
+            // Main window.
             var mainWindow = new MainWindow();
+
 
             mainWindow.ConfigureViews(
                 equipmentView,
                 borrowView,
-                activeBorrowingsView);
+                activeBorrowingsView,
+                studentManagementView);
+
 
             desktop.MainWindow = mainWindow;
-
-            // Dispose the shared DbContext when the application exits.
-            desktop.ShutdownRequested += (_, _) =>
-            {
-                dbContext.Dispose();
-            };
         }
 
         base.OnFrameworkInitializationCompleted();
