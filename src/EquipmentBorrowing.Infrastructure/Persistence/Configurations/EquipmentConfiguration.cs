@@ -45,10 +45,13 @@ public sealed class EquipmentConfiguration
             .IsRequired()
             .HasDefaultValue(true);
 
+
         builder.Property<string>("NormalizedEquipmentIdentifier")
             .HasComputedColumnSql(
-                "lower(btrim(\"EquipmentIdentifier\"))",
+                "lower(regexp_replace(\"EquipmentIdentifier\", " +
+                "'^[[:space:]]+|[[:space:]]+$', '', 'g'))",
                 stored: true);
+
 
         builder.HasIndex("NormalizedEquipmentIdentifier")
             .IsUnique()

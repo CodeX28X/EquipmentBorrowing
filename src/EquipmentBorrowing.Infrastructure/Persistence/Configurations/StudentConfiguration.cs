@@ -49,10 +49,13 @@ public sealed class StudentConfiguration
             .HasDefaultValue(true);
 
         // PostgreSQL computes the normalized identifier.
+
         builder.Property<string>("NormalizedStudentNumber")
             .HasComputedColumnSql(
-                "lower(btrim(\"StudentNumber\"))",
+                "lower(regexp_replace(\"StudentNumber\", " +
+                "'^[[:space:]]+|[[:space:]]+$', '', 'g'))",
                 stored: true);
+
 
         builder.HasIndex("NormalizedStudentNumber")
             .IsUnique()

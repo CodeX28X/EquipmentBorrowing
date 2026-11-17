@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EquipmentBorrowing.Infrastructure.Migrations
 {
     [DbContext(typeof(EquipmentBorrowingDbContext))]
-    [Migration("20261117180718_InitialPostgreSql")]
-    partial class InitialPostgreSql
+    [Migration("20261117182722_AlignEquipmentIdentifierNormalization")]
+    partial class AlignEquipmentIdentifierNormalization
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -102,7 +102,7 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
                     b.Property<string>("NormalizedEquipmentIdentifier")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("text")
-                        .HasComputedColumnSql("lower(btrim(\"EquipmentIdentifier\"))", true);
+                        .HasComputedColumnSql("lower(regexp_replace(\"EquipmentIdentifier\", '^[[:space:]]+|[[:space:]]+$', '', 'g'))", true);
 
                     b.HasKey("EquipmentId");
 
@@ -140,7 +140,7 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
                     b.Property<string>("NormalizedStudentNumber")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("text")
-                        .HasComputedColumnSql("lower(btrim(\"StudentNumber\"))", true);
+                        .HasComputedColumnSql("lower(regexp_replace(\"StudentNumber\", '^[[:space:]]+|[[:space:]]+$', '', 'g'))", true);
 
                     b.Property<string>("StudentName")
                         .IsRequired()

@@ -41,7 +41,7 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
                     StudentYear = table.Column<int>(type: "integer", nullable: true),
                     ContactInformation = table.Column<string>(type: "text", nullable: true),
                     IsAllowedToBorrow = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    NormalizedStudentNumber = table.Column<string>(type: "text", nullable: true, computedColumnSql: "lower(btrim(\"StudentNumber\"))", stored: true)
+                    NormalizedStudentNumber = table.Column<string>(type: "text", nullable: true, computedColumnSql: "lower(regexp_replace(\"StudentNumber\", '^[[:space:]]+|[[:space:]]+$', '', 'g'))", stored: true)
                 },
                 constraints: table =>
                 {

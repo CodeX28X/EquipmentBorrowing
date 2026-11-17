@@ -99,7 +99,7 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
                     b.Property<string>("NormalizedEquipmentIdentifier")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("text")
-                        .HasComputedColumnSql("lower(btrim(\"EquipmentIdentifier\"))", true);
+                        .HasComputedColumnSql("lower(regexp_replace(\"EquipmentIdentifier\", '^[[:space:]]+|[[:space:]]+$', '', 'g'))", true);
 
                     b.HasKey("EquipmentId");
 
@@ -137,7 +137,7 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
                     b.Property<string>("NormalizedStudentNumber")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("text")
-                        .HasComputedColumnSql("lower(btrim(\"StudentNumber\"))", true);
+                        .HasComputedColumnSql("lower(regexp_replace(\"StudentNumber\", '^[[:space:]]+|[[:space:]]+$', '', 'g'))", true);
 
                     b.Property<string>("StudentName")
                         .IsRequired()
