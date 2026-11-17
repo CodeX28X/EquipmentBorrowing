@@ -37,9 +37,10 @@ public class Student
         StudentId = studentId;
 
         UpdateInformation(
-            studentNumber,
-            studentName,
-            contactInformation);
+    studentNumber,
+    studentName,
+    contactInformation,
+    studentYear);
 
         if (studentYear is <= 0)
         {
@@ -57,7 +58,8 @@ public class Student
     public void UpdateInformation(
         string studentNumber,
         string studentName,
-        string? contactInformation)
+        string? contactInformation,
+        int? studentYear = null)
     {
         if (string.IsNullOrWhiteSpace(studentNumber))
         {
@@ -84,6 +86,13 @@ public class Student
             string.IsNullOrWhiteSpace(contactInformation)
                 ? null
                 : contactInformation.Trim();
+
+        if (studentYear is <= 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(studentYear),
+                "Student year must be greater than zero when supplied.");
+        }
     }
 
     public void SetBorrowingEligibility(bool isAllowed)

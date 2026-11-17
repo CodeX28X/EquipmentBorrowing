@@ -94,13 +94,32 @@ public partial class App : Avalonia.Application
                     DataContext = activeBorrowingsViewModel
                 };
 
+            // Student Managaemnt.
+
+            var studentManagementService =
+                 new PostgreSqlStudentManagementService(contextFactory);
+
+            var studentManagementViewModel =
+                new StudentManagementViewModel(
+                    studentReader,
+                    studentManagementService);
+
+            var studentManagementView =
+                new StudentManagementView
+                {
+                    DataContext = studentManagementViewModel
+                };
+
             // Main window.
             var mainWindow = new MainWindow();
+
 
             mainWindow.ConfigureViews(
                 equipmentView,
                 borrowView,
-                activeBorrowingsView);
+                activeBorrowingsView,
+                studentManagementView);
+
 
             desktop.MainWindow = mainWindow;
         }

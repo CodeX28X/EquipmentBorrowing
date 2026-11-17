@@ -445,4 +445,192 @@ public sealed class PostgreSqlAtomicBorrowingTests
     }
 
 
+    [Fact]
+    public async Task ConcurrentStudents_CannotBorrowSameEquipment()
+    {
+        var (factory, service) = CreateServices();
+
+        var (firstStudentId, items) =
+            await SeedAsync(factory, 1);
+
+        int secondStudentId =
+            System.Security.Cryptography.RandomNumberGenerator
+                .GetInt32(100000, 2000000000);
+
+        while (secondStudentId == firstStudentId)
+        {
+            secondStudentId =
+                System.Security.Cryptography.RandomNumberGenerator
+                    .GetInt32(100000, 2000000000);
+        }
+
+        await using (var db =
+            await factory.CreateDbContextAsync())
+        {
+            db.Students.Add(new Student(
+                secondStudentId,
+                $"IT-{secondStudentId}",
+                "Second Integration Test Student"));
+
+            await db.SaveChangesAsync();
+        }
+
+        try
+        {
+            var results = await Task.WhenAll(
+                service.CheckoutAsync(
+                    firstStudentId,
+                    items,
+                    CheckoutDate,
+                    DueDate),
+                service.CheckoutAsync(
+                    secondStudentId,
+                    items,
+                    CheckoutDate,
+                    DueDate));
+
+            Assert.Single(
+                results,
+                r => r.Status ==
+                    BorrowingOperationStatus.Success);
+
+            Assert.Single(
+                results,
+                r => r.Status ==
+                    BorrowingOperationStatus.Rejected);
+
+            await using var db =
+                await factory.CreateDbContextAsync();
+
+            var activeLoans = await db.Borrowings
+                .AsNoTracking()
+                .Where(b =>
+                    b.EquipmentId == items[0] &&
+                    b.Status == BorrowingStatus.Active)
+                .ToListAsync();
+
+            Assert.Single(activeLoans);
+
+            bool isAvailable = await db.Equipment
+                .Where(e => e.EquipmentId == items[0])
+                .Select(e => e.IsAvailable)
+                .SingleAsync();
+
+            Assert.False(isAvailable);
+        }
+        finally
+        {
+            await CleanupAsync(
+                factory,
+                firstStudentId,
+                items);
+
+            await using var db =
+                await factory.CreateDbContextAsync();
+
+            await db.Students
+                .Where(s => s.StudentId == secondStudentId)
+                .ExecuteDeleteAsync();
+        }
+    }
+
+
+    [Fact]
+    public async Task IneligibleStudent_CanReturnExistingBorrowing()
+    {
+        var (factory, service) = CreateServices();
+        var (studentId, items) = await SeedAsync(factory, 1);
+
+        try
+        {
+            var checkout = await service.CheckoutAsync(
+                studentId,
+                items,
+                CheckoutDate,
+                DueDate);
+
+            Assert.Equal(
+                BorrowingOperationStatus.Success,
+                checkout.Status);
+
+            // Student becomes ineligible after borrowing.
+            await using (var db =
+                await factory.CreateDbContextAsync())
+            {
+                var student = await db.Students
+                    .SingleAsync(s => s.StudentId == studentId);
+
+                student.SetBorrowingEligibility(false);
+
+                await db.SaveChangesAsync();
+            }
+
+            var returned = await service.ReturnAsync(
+                studentId,
+                items[0],
+                CheckoutDate);
+
+            Assert.Equal(
+                BorrowingOperationStatus.Success,
+                returned.Status);
+
+            await using var verificationDb =
+                await factory.CreateDbContextAsync();
+
+            var borrowing = await verificationDb.Borrowings
+                .AsNoTracking()
+                .SingleAsync(b => b.StudentId == studentId);
+
+            var equipment = await verificationDb.Equipment
+                .AsNoTracking()
+                .SingleAsync(e => e.EquipmentId == items[0]);
+
+            Assert.Equal(
+                BorrowingStatus.Returned,
+                borrowing.Status);
+
+            Assert.True(equipment.IsAvailable);
+        }
+        finally
+        {
+            await CleanupAsync(factory, studentId, items);
+        }
+    }
+
+
+    [Fact]
+    public async Task Checkout_WhenDatabaseUnavailable_ReturnsFailed()
+    {
+        var builder = new NpgsqlConnectionStringBuilder(
+            GetConnectionString())
+        {
+            Port = 1,
+            Timeout = 1,
+            Pooling = false
+        };
+
+        var options =
+            new DbContextOptionsBuilder<EquipmentBorrowingDbContext>()
+                .UseNpgsql(builder.ConnectionString)
+                .Options;
+
+        var factory =
+            new EquipmentBorrowingContextFactory(options);
+
+        var service =
+            new PostgreSqlAtomicBorrowingService(factory);
+
+        var result = await service.CheckoutAsync(
+            studentId: 1,
+            equipmentIds: new[] { 1 },
+            checkoutDate: CheckoutDate,
+            expectedReturnDate: DueDate);
+
+        Assert.Equal(
+            BorrowingOperationStatus.Failed,
+            result.Status);
+
+        Assert.False(result.IsSuccess);
+    }
+
 }

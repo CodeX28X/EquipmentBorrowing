@@ -1,0 +1,131 @@
+
+
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
+    xmlns:domain="using:EquipmentBorrowing.Domain.Entities"
+    x:Class="EquipmentBorrowing.Desktop.Views.StudentManagementView"
+    x:DataType="vm:StudentManagementViewModel">
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="20" RowSpacing="14">
+
+        <StackPanel Grid.Row="0" Spacing="6">
+            <TextBlock Text="Student Management"
+                       FontSize="24"
+                       FontWeight="Bold"/>
+            <TextBlock
+                Text="Register students, update details, and manage borrowing eligibility."
+                TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1"
+              ColumnDefinitions="1.1*,1*"
+              ColumnSpacing="18">
+
+            <!-- Student list -->
+            <Border Grid.Column="0"
+                    BorderBrush="#CCCCCC"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="12">
+                <Grid RowDefinitions="Auto,*" RowSpacing="10">
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Registered students"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
+
+                        <Button Grid.Column="1"
+                                Content="Refresh"
+                                Command="{Binding LoadCommand}"/>
+                    </Grid>
+
+                    <ListBox Grid.Row="1"
+                             ItemsSource="{Binding Students}"
+                             SelectedItem="{Binding SelectedStudent, Mode=TwoWay}">
+                        
+<ListBox.ItemTemplate>
+    <DataTemplate x:DataType="domain:Student">
+        <StackPanel Margin="4" Spacing="3">
+            <TextBlock
+                Text="{Binding StudentName}"
+                FontWeight="SemiBold"/>
+
+            <TextBlock
+                Text="{Binding StudentNumber}"
+                FontSize="12"/>
+
+            <TextBlock
+                Text="{Binding IsAllowedToBorrow,
+                    StringFormat='Eligible to borrow: {0}'}"
+                FontSize="12"/>
+        </StackPanel>
+    </DataTemplate>
+</ListBox.ItemTemplate>
+
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- Student form -->
+            <Border Grid.Column="1"
+                    BorderBrush="#CCCCCC"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16">
+
+                <ScrollViewer>
+                    <StackPanel Spacing="10">
+
+                        <TextBlock Text="{Binding FormTitle}"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"/>
+
+                        <TextBlock Text="Student number *"/>
+                        <TextBox Text="{Binding StudentNumber, Mode=TwoWay}"
+                                 PlaceholderText="e.g. STU-0005"/>
+
+                        <TextBlock Text="Full name *"/>
+                        <TextBox Text="{Binding StudentName, Mode=TwoWay}"
+                                 PlaceholderText="Enter full name"/>
+
+                        <TextBlock Text="Contact information (optional)"/>
+                        <TextBox Text="{Binding ContactInformation, Mode=TwoWay}"
+                                 PlaceholderText="Email or phone"/>
+
+                        <TextBlock Text="Year level (optional)"/>
+                        <TextBox Text="{Binding StudentYear, Mode=TwoWay}"
+                                 PlaceholderText="e.g. 3"/>
+
+                        <Button Content="Save student"
+                                HorizontalAlignment="Stretch"
+                                IsEnabled="{Binding !IsBusy}"
+                                Command="{Binding SaveCommand}"/>
+
+                        <Button Content="New student"
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding NewStudentCommand}"/>
+
+                        <Separator Margin="0,8"/>
+
+                        <TextBlock Text="Borrowing eligibility"
+                                   FontWeight="SemiBold"/>
+
+                        <TextBlock Text="{Binding SelectedStudent.IsAllowedToBorrow,
+                            StringFormat='Currently eligible: {0}'}"/>
+
+                        <Button Content="Toggle eligibility"
+                                IsEnabled="{Binding IsEditing}"
+                                Command="{Binding ToggleEligibilityCommand}"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <TextBlock Grid.Row="2"
+                   Text="{Binding StatusMessage}"
+                   TextWrapping="Wrap"/>
+    </Grid>
+</UserControl>
