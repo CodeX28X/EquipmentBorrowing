@@ -1,120 +1,74 @@
-﻿using EquipmentBorrowing.Domain.Entities;
-using EquipmentBorrowing.Domain.Enums;
+﻿
+using EquipmentBorrowing.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EquipmentBorrowing.Infrastructure.Persistence;
 
-
 public static class DatabaseSeeder
 {
+    // Call explicitly only after applying the correct
+    // PostgreSQL migrations.
+    // Do not invoke automatically during normal startup.
     public static async Task InitializeAsync(
         EquipmentBorrowingDbContext dbContext,
         CancellationToken cancellationToken = default)
     {
-        // Apply existing migrations without deleting existing data.
-        await dbContext.Database.MigrateAsync(cancellationToken);
+        ArgumentNullException.ThrowIfNull(dbContext);
 
-        // ---------------------------------------------------------
-        // STUDENTS
-        // ---------------------------------------------------------
+        // Never overwrite a database that already has data.
+        bool hasStudents = await dbContext.Students
+            .AnyAsync(cancellationToken);
 
-        var students = new[]
+        bool hasEquipment = await dbContext.Equipment
+            .AnyAsync(cancellationToken);
 
+        bool hasBorrowings = await dbContext.Borrowings
+            .AnyAsync(cancellationToken);
 
-
-
+        if (hasStudents || hasEquipment || hasBorrowings)
         {
-            new Student(1, "Juan Dela Cruz", 3, true),
-            new Student(2, "Maria Santos", 2, true),
-            new Student(3, "Pedro Reyes", 1, false),
-            new Student(4, "Ana Garcia", 4, true)
-
-
-        };
-
-        foreach (var student in students)
-        {
-            var exists = await dbContext.Students
-                .AnyAsync(
-                    existing => existing.StudentId == student.StudentId,
-                    cancellationToken);
-
-            if (!exists)
-            {
-                dbContext.Students.Add(student);
-            }
+            return;
         }
 
-        // ---------------------------------------------------------
-        // EQUIPMENT
-        // ---------------------------------------------------------
+        var students = new[]
+        {
+            new Student(
+                1, "STU-0001", "Juan Dela Cruz",
+                studentYear: 3),
+
+            new Student(
+                2, "STU-0002", "Maria Santos",
+                studentYear: 2),
+
+            new Student(
+                3, "STU-0003", "Pedro Reyes",
+                studentYear: 1),
+
+            new Student(
+                4, "STU-0004", "Ana Garcia",
+                studentYear: 4)
+        };
+
+        // Sample student who cannot borrow.
+        students[2].SetBorrowingEligibility(false);
 
         var equipment = new[]
         {
-            new Equipment(1, "Laptop 01"),
-            new Equipment(2, "Laptop 02"),
-            new Equipment(3, "Projector 01"),
-            new Equipment(4, "Camera 01")
+            new Equipment(
+                1, "LAP-001", "Laptop 01"),
+
+            new Equipment(
+                2, "LAP-002", "Laptop 02"),
+
+            new Equipment(
+                3, "PROJ-001", "Projector 01"),
+
+            new Equipment(
+                4, "CAM-001", "Camera 01")
         };
 
-        foreach (var item in equipment)
-        {
-            var exists = await dbContext.Equipment
-                .AnyAsync(
-                    existing => existing.EquipmentId == item.EquipmentId,
-                    cancellationToken);
-
-            if (!exists)
-            {
-                dbContext.Equipment.Add(item);
-            }
-        }
-
-        await dbContext.SaveChangesAsync(cancellationToken);
-
-        // ---------------------------------------------------------
-        // ACTIVE BORROWING SCENARIO
-        // ---------------------------------------------------------
-        // Equipment 1 is intentionally unavailable because it is
-        // currently borrowed by Student 1.
-
-        var existingBorrowing =
-            await dbContext.Borrowings
-                .AnyAsync(
-                    borrowing =>
-                        borrowing.Student.StudentId == 1 &&
-                        borrowing.Equipment.EquipmentId == 1,
-                    cancellationToken);
-
-
-        if (!existingBorrowing)
-        {
-            var student = await dbContext.Students
-                .SingleAsync(
-                    student => student.StudentId == 1,
-                    cancellationToken);
-
-            var item = await dbContext.Equipment
-                .SingleAsync(
-                    equipment => equipment.EquipmentId == 1,
-                    cancellationToken);
-
-            if (item.IsAvailable)
-            {
-                item.MarkAsBorrowed();
-
-                var borrowedAt = DateTime.Now;
-                var expectedReturnDate = borrowedAt.AddDays(7);
-
-                var borrowing = new Borrowing(
-                    student,
-                    item,
-                    borrowedAt,
-                    expectedReturnDate);
-
-                dbContext.Borrowings.Add(borrowing);
-            }
-        }
+        dbContext.Students.AddRange(students);
+        dbContext.Equipment.AddRange(equipment);
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }

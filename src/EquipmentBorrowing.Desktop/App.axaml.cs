@@ -38,10 +38,25 @@ public partial class App : Avalonia.Application
             // DATABASE
             // ---------------------------------------------------------
 
+
+            const string connectionVariable =
+                "EQUIPMENTBORROWING_CONNECTION_STRING";
+
+            string? connectionString =
+                Environment.GetEnvironmentVariable(connectionVariable);
+
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new InvalidOperationException(
+                    $"Missing {connectionVariable}. " +
+                    "Configure the PostgreSQL connection string.");
+            }
+
             var dbOptions =
                 new DbContextOptionsBuilder<EquipmentBorrowingDbContext>()
-                    .UseSqlite("Data Source=EquipmentBorrowing.db")
+                    .UseNpgsql(connectionString)
                     .Options;
+
 
             // Initialize database and seed data.
             using (var initializationContext =

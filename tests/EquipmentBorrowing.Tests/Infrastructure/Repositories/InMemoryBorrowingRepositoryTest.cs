@@ -1,171 +1,166 @@
+
 using EquipmentBorrowing.Domain.Entities;
+using EquipmentBorrowing.Domain.Enums;
 using EquipmentBorrowing.Infrastructure.Repositories;
 
 namespace EquipmentBorrowing.Tests.Infrastructure.Repositories;
 
 public class InMemoryBorrowingRepositoryTests
 {
-	[Fact]
-	public async Task CountActiveByStudentAsync_WhenNoBorrowingsExist_ReturnsZero()
-	{
-		// Arrange
-		InMemoryBorrowingRepository repository =
-			new InMemoryBorrowingRepository();
+    private static Student CreateStudent(int id = 1) =>
+        new(id, $"STU-{id:000}", $"Student {id}");
 
-		// Act
-		int count =
-			await repository.CountActiveByStudentAsync(1);
+    private static Equipment CreateEquipment(int id) =>
+        new(id, $"EQ-{id:000}", $"Equipment {id}");
 
-		// Assert
-		Assert.Equal(0, count);
-	}
+    private static Borrowing CreateBorrowing(
+        Student student, Equipment equipment) =>
+        new(
+            student,
+            equipment,
+            new DateOnly(2025, 1, 10),
+            new DateOnly(2025, 1, 17));
 
-	[Fact]
-	public async Task CountActiveByStudentAsync_WhenStudentHasActiveBorrowing_ReturnsCorrectCount()
-	{
-		// Arrange
-		Student student = new Student(
-			1,
-			"John Doe",
-			2,
-			true);
+    [Fact]
+    public async Task NoBorrowings_ActiveCountIsZero()
+    {
+        var repo = new InMemoryBorrowingRepository();
 
-		Equipment equipment = new Equipment(
-			1,
-			"Laptop");
+        Assert.Equal(0,
+            await repo.CountActiveByStudentAsync(1));
+    }
 
-		Borrowing borrowing = new Borrowing(
-			student,
-			equipment,
-			new DateTime(2026, 8, 28, 9, 0, 0),
-			new DateTime(2026, 8, 30, 9, 0, 0));
+    [Fact]
+    public async Task ActiveBorrowings_AreCounted()
+    {
+        var student = CreateStudent();
+        var first = CreateBorrowing(
+            student, CreateEquipment(1));
+        var second = CreateBorrowing(
+            student, CreateEquipment(2));
 
-		InMemoryBorrowingRepository repository =
-			new InMemoryBorrowingRepository(
-				new[] { borrowing });
+        var repo = new InMemoryBorrowingRepository(
+            new[] { first, second });
 
-		// Act
-		int count =
-			await repository.CountActiveByStudentAsync(
-				student.StudentId);
+        Assert.Equal(2,
+            await repo.CountActiveByStudentAsync(1));
+    }
 
-		// Assert
-		Assert.Equal(1, count);
-	}
+    [Fact]
+    public async Task ReturnedBorrowing_IsNotCounted()
+    {
+        var student = CreateStudent();
+        var borrowing = CreateBorrowing(
+            student, CreateEquipment(1));
 
-	[Fact]
-	public async Task CountActiveByStudentAsync_WhenBorrowingIsReturned_DoesNotCountIt()
-	{
-		// Arrange
-		Student student = new Student(
-			1,
-			"John Doe",
-			2,
-			true);
+        borrowing.MarkAsReturned(
+            new DateOnly(2025, 1, 12));
 
-		Equipment equipment = new Equipment(
-			1,
-			"Laptop");
+        var repo = new InMemoryBorrowingRepository(
+            new[] { borrowing });
 
-		Borrowing borrowing = new Borrowing(
-			student,
-			equipment,
-			new DateTime(2026, 8, 28, 9, 0, 0),
-			new DateTime(2026, 8, 30, 9, 0, 0));
+        Assert.Equal(0,
+            await repo.CountActiveByStudentAsync(1));
+    }
 
-		borrowing.MarkAsReturned();
+    [Fact]
+    public async Task AddAsync_StoresNewBorrowing()
+    {
+        var student = CreateStudent();
+        var borrowing = CreateBorrowing(
+            student, CreateEquipment(1));
 
-		InMemoryBorrowingRepository repository =
-			new InMemoryBorrowingRepository(
-				new[] { borrowing });
+        var repo = new InMemoryBorrowingRepository();
 
-		// Act
-		int count =
-			await repository.CountActiveByStudentAsync(
-				student.StudentId);
+        await repo.AddAsync(borrowing);
 
-		// Assert
-		Assert.Equal(0, count);
-	}
+        Assert.Equal(1,
+            await repo.CountActiveByStudentAsync(1));
+    }
 
-	[Fact]
-	public async Task AddAsync_WhenBorrowingIsAdded_IncreasesActiveCount()
-	{
-		// Arrange
-		Student student = new Student(
-			1,
-			"John Doe",
-			2,
-			true);
+    [Fact]
+    public async Task GetActive_ExcludesReturnedRecords()
+    {
+        var student = CreateStudent();
 
-		Equipment equipment = new Equipment(
-			1,
-			"Laptop");
+        var active = CreateBorrowing(
+            student, CreateEquipment(1));
 
-		Borrowing borrowing = new Borrowing(
-			student,
-			equipment,
-			new DateTime(2026, 8, 28, 9, 0, 0),
-			new DateTime(2026, 8, 30, 9, 0, 0));
+        var returned = CreateBorrowing(
+            student, CreateEquipment(2));
 
-		InMemoryBorrowingRepository repository =
-			new InMemoryBorrowingRepository();
+        returned.MarkAsReturned(
+            new DateOnly(2025, 1, 12));
 
-		// Act
-		await repository.AddAsync(borrowing);
+        var repo = new InMemoryBorrowingRepository(
+            new[] { active, returned });
 
-		int count =
-			await repository.CountActiveByStudentAsync(
-				student.StudentId);
+        var results = await repo.GetActiveAsync();
 
-		// Assert
-		Assert.Equal(1, count);
-	}
+        Assert.Single(results);
+        Assert.Contains(active, results);
+        Assert.DoesNotContain(returned, results);
+    }
 
-	[Fact]
-	public async Task GetActiveAsync_ReturnOnlyActiveBorrowing()
-	{
-		//Arrange
-		var repository = new InMemoryBorrowingRepository();
+    [Fact]
+    public async Task FindActiveByStudentAndEquipment_ReturnsMatch()
+    {
+        var student = CreateStudent();
+        var equipment = CreateEquipment(1);
+        var borrowing = CreateBorrowing(
+            student, equipment);
 
-		var student = new Student(
-			1,
-            "John Doe",
-			1,
-			true
-			);
+        var repo = new InMemoryBorrowingRepository(
+            new[] { borrowing });
 
-		var equipment1 = new Equipment(
-			1,
-			"Laptop");
+        var result =
+            await repo.GetActiveByStudentAndEquipmentAsync(
+                student.StudentId,
+                equipment.EquipmentId);
 
-		var equipment2 = new Equipment(
-			2,
-			"Projector");
+        Assert.Same(borrowing, result);
+    }
 
-		var activeBorrowing = new Borrowing(
-			student,
-			equipment1,
-			DateTime.Now,
-			DateTime.Now.AddDays(3));
+    [Fact]
+    public async Task FindActive_DoesNotReturnCompletedLoan()
+    {
+        var student = CreateStudent();
+        var equipment = CreateEquipment(1);
+        var borrowing = CreateBorrowing(
+            student, equipment);
 
-		var returnedBorrowing = new Borrowing(
-			student,
-			equipment2,
-			DateTime.Now,
-			DateTime.Now.AddDays(3));
+        borrowing.MarkAsReturned(
+            new DateOnly(2025, 1, 12));
 
-		returnedBorrowing.MarkAsReturned();
+        var repo = new InMemoryBorrowingRepository(
+            new[] { borrowing });
 
-		await repository.AddAsync(activeBorrowing);
-		await repository.AddAsync(returnedBorrowing);
+        var result =
+            await repo.GetActiveByStudentAndEquipmentAsync(
+                student.StudentId,
+                equipment.EquipmentId);
 
-		//Act
-		var result = await repository.GetActiveAsync();
+        Assert.Null(result);
+        Assert.Equal(BorrowingStatus.Returned,
+            borrowing.Status);
+    }
 
-		//Assert
-		Assert.Single(result);
-		Assert.Contains(activeBorrowing, result);
-		Assert.DoesNotContain(returnedBorrowing, result);
-	}
+    [Fact]
+    public async Task DifferentStudent_HasSeparateCount()
+    {
+        var first = CreateBorrowing(
+            CreateStudent(1), CreateEquipment(1));
+
+        var second = CreateBorrowing(
+            CreateStudent(2), CreateEquipment(2));
+
+        var repo = new InMemoryBorrowingRepository(
+            new[] { first, second });
+
+        Assert.Equal(1,
+            await repo.CountActiveByStudentAsync(1));
+
+        Assert.Equal(1,
+            await repo.CountActiveByStudentAsync(2));
+    }
 }

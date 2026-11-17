@@ -1,3 +1,4 @@
+
 using EquipmentBorrowing.Application.Services;
 using EquipmentBorrowing.Domain.Entities;
 using EquipmentBorrowing.Domain.Enums;
@@ -7,177 +8,113 @@ namespace EquipmentBorrowing.Tests;
 
 public class ReturnEquipmentServiceTests
 {
-    [Fact]
-    public async Task ReturnAsync_WithActiveBorrowing_ReturnsSuccess()
+    private static (Student Student, Equipment Item,
+        Borrowing Loan, InMemoryBorrowingRepository Repo)
+        CreateActiveLoan()
     {
-        // Arrange
         var student = new Student(
-            1,
-            "Juan Dela Cruz",
-            2,
-            true);
+            1, "STU-001", "Juan Dela Cruz");
 
-        var equipment = new Equipment(
-            101,
-            "Laptop");
+        var item = new Equipment(
+            101, "LAP-101", "Laptop");
 
-        var borrowing = new Borrowing(
+        var loan = new Borrowing(
             student,
-            equipment,
-            DateTime.Now,
-            DateTime.Now.AddDays(7));
+            item,
+            new DateOnly(2025, 1, 10),
+            new DateOnly(2025, 1, 17));
 
-        equipment.MarkAsBorrowed();
+        item.MarkAsBorrowed();
 
-        var repository = new InMemoryBorrowingRepository(
-            new[] { borrowing });
+        var repo = new InMemoryBorrowingRepository(
+            new[] { loan });
 
-        var service = new ReturnEquipmentService(repository);
+        return (student, item, loan, repo);
+    }
 
-        // Act
+    [Fact]
+    public async Task ActiveLoan_ReturnsSuccessfully()
+    {
+        var data = CreateActiveLoan();
+        var service = new ReturnEquipmentService(data.Repo);
+
         var result = await service.ReturnAsync(
-            student.StudentId,
-            equipment.EquipmentId);
+            data.Student.StudentId, data.Item.EquipmentId);
 
-        // Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal(
-            "Equipment returned successfully.",
+        Assert.Equal("Equipment returned successfully.",
             result.Message);
-        Assert.NotNull(result.Borrowing);
+        Assert.Same(data.Loan, result.Borrowing);
     }
 
     [Fact]
-    public async Task ReturnAsync_WithActiveBorrowing_MarksBorrowingAsReturned()
+    public async Task Return_RecordsDateAndStatus()
     {
-        // Arrange
-        var student = new Student(
-            1,
-            "Juan Dela Cruz",
-            2,
-            true);
+        var data = CreateActiveLoan();
+        var service = new ReturnEquipmentService(data.Repo);
 
-        var equipment = new Equipment(
-            101,
-            "Laptop");
+        await service.ReturnAsync(1, 101);
 
-        var borrowing = new Borrowing(
-            student,
-            equipment,
-            DateTime.Now,
-            DateTime.Now.AddDays(7));
-
-        equipment.MarkAsBorrowed();
-
-        var repository = new InMemoryBorrowingRepository(
-            new[] { borrowing });
-
-        var service = new ReturnEquipmentService(repository);
-
-        // Act
-        await service.ReturnAsync(
-            student.StudentId,
-            equipment.EquipmentId);
-
-        // Assert
-        Assert.Equal(
-            BorrowingStatus.Returned,
-            borrowing.Status);
+        Assert.Equal(BorrowingStatus.Returned,
+            data.Loan.Status);
+        Assert.NotNull(data.Loan.ActualReturnDate);
+        Assert.True(data.Loan.ActualReturnDate
+            >= data.Loan.BorrowedAt);
     }
 
     [Fact]
-    public async Task ReturnAsync_WithActiveBorrowing_MakesEquipmentAvailable()
+    public async Task Return_MakesEquipmentAvailable()
     {
-        // Arrange
-        var student = new Student(
-            1,
-            "Juan Dela Cruz",
-            2,
-            true);
+        var data = CreateActiveLoan();
+        var service = new ReturnEquipmentService(data.Repo);
 
-        var equipment = new Equipment(
-            101,
-            "Laptop");
+        await service.ReturnAsync(1, 101);
 
-        var borrowing = new Borrowing(
-            student,
-            equipment,
-            DateTime.Now,
-            DateTime.Now.AddDays(7));
-
-        equipment.MarkAsBorrowed();
-
-        var repository = new InMemoryBorrowingRepository(
-            new[] { borrowing });
-
-        var service = new ReturnEquipmentService(repository);
-
-        // Act
-        await service.ReturnAsync(
-            student.StudentId,
-            equipment.EquipmentId);
-
-        // Assert
-        Assert.True(equipment.IsAvailable);
+        Assert.True(data.Item.IsAvailable);
+        Assert.Empty(await data.Repo.GetActiveAsync());
     }
 
     [Fact]
-    public async Task ReturnAsync_WhenNoActiveBorrowingExists_ReturnsFailure()
+    public async Task MissingActiveLoan_IsRejected()
     {
-        // Arrange
-        var repository = new InMemoryBorrowingRepository();
+        var repo = new InMemoryBorrowingRepository();
+        var service = new ReturnEquipmentService(repo);
 
-        var service = new ReturnEquipmentService(repository);
+        var result = await service.ReturnAsync(999, 999);
 
-        // Act
-        var result = await service.ReturnAsync(
-            999,
-            999);
-
-        // Assert
         Assert.False(result.IsSuccess);
         Assert.Null(result.Borrowing);
-        Assert.Equal(
-            "No active borrowing was found for the specified student and equipment.",
-            result.Message);
     }
 
     [Fact]
-    public async Task ReturnAsync_WhenBorrowingWasAlreadyReturned_ReturnsFailure()
+    public async Task RepeatReturn_IsRejectedWithoutChanges()
     {
-        // Arrange
-        var student = new Student(
-            1,
-            "Juan Dela Cruz",
-            2,
-            true);
+        var data = CreateActiveLoan();
+        var service = new ReturnEquipmentService(data.Repo);
 
-        var equipment = new Equipment(
-            101,
-            "Laptop");
+        var first = await service.ReturnAsync(1, 101);
+        var originalDate = data.Loan.ActualReturnDate;
 
-        var borrowing = new Borrowing(
-            student,
-            equipment,
-            DateTime.Now,
-            DateTime.Now.AddDays(7));
+        var second = await service.ReturnAsync(1, 101);
 
-        equipment.MarkAsBorrowed();
-        borrowing.MarkAsReturned();
-        equipment.MarkAsAvailable();
+        Assert.True(first.IsSuccess);
+        Assert.False(second.IsSuccess);
+        Assert.Equal(originalDate,
+            data.Loan.ActualReturnDate);
+        Assert.True(data.Item.IsAvailable);
+    }
 
-        var repository = new InMemoryBorrowingRepository(
-            new[] { borrowing });
+    [Fact]
+    public async Task RestrictedStudent_CanReturnExistingLoan()
+    {
+        var data = CreateActiveLoan();
+        data.Student.SetBorrowingEligibility(false);
+        var service = new ReturnEquipmentService(data.Repo);
 
-        var service = new ReturnEquipmentService(repository);
+        var result = await service.ReturnAsync(1, 101);
 
-        // Act
-        var result = await service.ReturnAsync(
-            student.StudentId,
-            equipment.EquipmentId);
-
-        // Assert
-        Assert.False(result.IsSuccess);
-        Assert.Null(result.Borrowing);
+        Assert.True(result.IsSuccess);
+        Assert.False(data.Student.IsAllowedToBorrow);
+        Assert.True(data.Item.IsAvailable);
     }
 }

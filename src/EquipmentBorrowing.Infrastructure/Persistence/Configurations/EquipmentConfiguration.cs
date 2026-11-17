@@ -1,28 +1,61 @@
-﻿using EquipmentBorrowing.Domain.Entities;
+﻿
+using EquipmentBorrowing.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EquipmentBorrowing.Infrastructure.Persistence.Configurations;
 
-public sealed class EquipmentConfiguration : IEntityTypeConfiguration<Equipment>
+public sealed class EquipmentConfiguration
+    : IEntityTypeConfiguration<Equipment>
 {
     public void Configure(EntityTypeBuilder<Equipment> builder)
     {
-        builder.HasKey(equipment => equipment.EquipmentId);
+        builder.ToTable("Equipment", table =>
+        {
+            table.HasCheckConstraint(
+                "CK_Equipment_Identifier_NotBlank",
+                "length(btrim(\"EquipmentIdentifier\")) > 0");
 
-        builder.Property(equipment => equipment.EquipmentId)
+            table.HasCheckConstraint(
+                "CK_Equipment_Name_NotBlank",
+                "length(btrim(\"EquipmentName\")) > 0");
+
+            table.HasCheckConstraint(
+                "CK_Equipment_Description_NotBlank",
+                "\"Description\" IS NULL OR " +
+                "length(btrim(\"Description\")) > 0");
+        });
+
+        builder.HasKey(e => e.EquipmentId);
+
+        // Preserve existing application-assigned IDs.
+        builder.Property(e => e.EquipmentId)
             .ValueGeneratedNever();
 
-        builder.Property(equipment => equipment.EquipmentName)
-            .IsRequired()
-            .HasMaxLength(64);
-
-        builder.Property(equipment => equipment.IsAvailable)
+        builder.Property(e => e.EquipmentIdentifier)
             .IsRequired();
 
-        builder.HasIndex(equipment => equipment.EquipmentName)
-            .IsUnique();
+        builder.Property(e => e.EquipmentName)
+            .IsRequired();
 
-        builder.HasIndex(equipment => equipment.IsAvailable);
+        builder.Property(e => e.Description)
+            .IsRequired(false);
+
+        builder.Property(e => e.IsAvailable)
+            .IsRequired()
+            .HasDefaultValue(true);
+
+        builder.Property<string>("NormalizedEquipmentIdentifier")
+            .HasComputedColumnSql(
+                "lower(btrim(\"EquipmentIdentifier\"))",
+                stored: true);
+
+        builder.HasIndex("NormalizedEquipmentIdentifier")
+            .IsUnique()
+            .HasDatabaseName("UX_Equipment_NormalizedIdentifier");
+
+        builder.HasIndex(e => e.EquipmentName);
+
+        builder.HasIndex(e => e.IsAvailable);
     }
 }

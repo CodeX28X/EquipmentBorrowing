@@ -1,3 +1,4 @@
+
 using EquipmentBorrowing.Domain.Entities;
 using EquipmentBorrowing.Infrastructure.Repositories;
 
@@ -5,118 +6,69 @@ namespace EquipmentBorrowing.Tests.Infrastructure.Repositories;
 
 public class InMemoryStudentRepositoryTests
 {
+    private static Student Create(int id) =>
+        new(id, $"STU-{id:000}", $"Student {id}");
+
     [Fact]
-    public async Task GetByIdAsync_WhenStudentExists_ReturnsStudent()
+    public async Task ExistingStudent_IsRetrievedById()
     {
-        // Arrange
-        Student student = new Student(
-            1,
-            "John Doe",
-            2,
-            true);
+        var student = Create(1);
+        var repo = new InMemoryStudentRepository(
+            new[] { student });
 
-        InMemoryStudentRepository repository =
-            new InMemoryStudentRepository(
-                new[] { student });
+        var result = await repo.GetByIdAsync(1);
 
-        // Act
-        Student? result =
-            await repository.GetByIdAsync(student.StudentId);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(student.StudentId, result.StudentId);
-        Assert.Equal(student.StudentName, result.StudentName);
+        Assert.Same(student, result);
+        Assert.Equal("STU-001", result!.StudentNumber);
     }
 
     [Fact]
-    public async Task GetByIdAsync_WhenStudentDoesNotExist_ReturnsNull()
+    public async Task MissingStudent_ReturnsNull()
     {
-        // Arrange
-        InMemoryStudentRepository repository =
-            new InMemoryStudentRepository();
+        var repo = new InMemoryStudentRepository();
 
-        // Act
-        Student? result =
-            await repository.GetByIdAsync(999);
+        var result = await repo.GetByIdAsync(999);
 
-        // Assert
         Assert.Null(result);
     }
 
     [Fact]
-    public async Task GetAllAsync_WhenStudentsExist_ReturnsAllStudents()
+    public async Task GetAll_ReturnsEveryStudent()
     {
-        Student student1 = new Student(
-            1,
-            "Stephen",
-            2,
-            true);
+        var first = Create(1);
+        var second = Create(2);
+        var repo = new InMemoryStudentRepository(
+            new[] { first, second });
 
-        Student student2 = new Student(
-            2,
-            "Scudge",
-            2,
-            true);
+        var results = await repo.GetAllAsync();
 
-        InMemoryStudentRepository repository =
-            new InMemoryStudentRepository(
-                new[] { student1, student2 });
-
-        IReadOnlyList<Student> result =
-            await repository.GetAllAsync();
-
-        Assert.Equal(2, result.Count);
+        Assert.Equal(2, results.Count);
+        Assert.Contains(first, results);
+        Assert.Contains(second, results);
     }
 
     [Fact]
-    public async Task GetAllAsync_WhenStudentsExist_ReturnsMatchingStudents()
+    public async Task GetAll_PreservesStudentDetails()
     {
-        Student student1 = new Student(
-            1,
-            "Stephen",
-            2,
-            true);
+        var student = Create(1);
+        var repo = new InMemoryStudentRepository(
+            new[] { student });
 
-        Student student2 = new Student(
-            2,
-            "Scudge",
-            2,
-            true);
+        var result = Assert.Single(
+            await repo.GetAllAsync());
 
-        InMemoryStudentRepository repository =
-            new InMemoryStudentRepository(
-                new[] { student1, student2 });
-
-        IReadOnlyList<Student> result =
-            await repository.GetAllAsync();
-
-        Assert.Equal(
-            student1.StudentId,
-            result[0].StudentId);
-
-        Assert.Equal(
-            student1.StudentName,
-            result[0].StudentName);
-
-        Assert.Equal(
-            student2.StudentId,
-            result[1].StudentId);
-
-        Assert.Equal(
-            student2.StudentName,
-            result[1].StudentName);
+        Assert.Equal(student.StudentId, result.StudentId);
+        Assert.Equal(student.StudentNumber,
+            result.StudentNumber);
+        Assert.Equal(student.StudentName,
+            result.StudentName);
     }
 
     [Fact]
-    public async Task GetAllAsync_WhenRepositoryIsEmpty_ReturnsEmptyCollection()
+    public async Task EmptyRepository_ReturnsEmptyCollection()
     {
-        InMemoryStudentRepository repository =
-            new InMemoryStudentRepository();
+        var repo = new InMemoryStudentRepository();
 
-        IReadOnlyList<Student> result =
-            await repository.GetAllAsync();
-
-        Assert.Empty(result);
+        Assert.Empty(await repo.GetAllAsync());
     }
 }
