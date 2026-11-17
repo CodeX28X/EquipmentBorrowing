@@ -4,6 +4,7 @@ using EquipmentBorrowing.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -15,85 +16,156 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.2");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "10.0.4")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("EquipmentBorrowing.Domain.Entities.Borrowing", b =>
                 {
                     b.Property<int>("BorrowingId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
-                    b.Property<DateTime>("BorrowedAt")
-                        .HasColumnType("TEXT");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BorrowingId"));
+
+                    b.Property<DateOnly?>("ActualReturnDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("BorrowedAt")
+                        .HasColumnType("date");
 
                     b.Property<int>("EquipmentId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
-                    b.Property<DateTime>("ExpectedReturnDate")
-                        .HasColumnType("TEXT");
+                    b.Property<DateOnly>("ExpectedReturnDate")
+                        .HasColumnType("date");
 
                     b.Property<int>("Status")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("StudentId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("BorrowingId");
 
-                    b.HasIndex("EquipmentId");
+                    b.HasIndex("BorrowedAt");
 
-                    b.HasIndex("Status");
+                    b.HasIndex("EquipmentId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Borrowings_ActiveEquipment")
+                        .HasFilter("\"Status\" = 0");
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("EquipmentId", "BorrowedAt");
 
-                    b.ToTable("Borrowings");
+                    b.HasIndex("Status", "ExpectedReturnDate");
+
+                    b.HasIndex("StudentId", "BorrowedAt");
+
+                    b.ToTable("Borrowings", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Borrowings_ActualReturnDate", "\"ActualReturnDate\" IS NULL OR \"ActualReturnDate\" >= \"BorrowedAt\"");
+
+                            t.HasCheckConstraint("CK_Borrowings_ExpectedReturnDate", "\"ExpectedReturnDate\" > \"BorrowedAt\"");
+
+                            t.HasCheckConstraint("CK_Borrowings_Status", "\"Status\" IN (0, 1)");
+
+                            t.HasCheckConstraint("CK_Borrowings_Status_ReturnDate", "(\"Status\" = 0 AND \"ActualReturnDate\" IS NULL) OR (\"Status\" = 1 AND \"ActualReturnDate\" IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("EquipmentBorrowing.Domain.Entities.Equipment", b =>
                 {
                     b.Property<int>("EquipmentId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EquipmentIdentifier")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("EquipmentName")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsAvailable")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("NormalizedEquipmentIdentifier")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("text")
+                        .HasComputedColumnSql("lower(btrim(\"EquipmentIdentifier\"))", true);
 
                     b.HasKey("EquipmentId");
 
-                    b.HasIndex("EquipmentName")
-                        .IsUnique();
+                    b.HasIndex("EquipmentName");
 
                     b.HasIndex("IsAvailable");
 
-                    b.ToTable("Equipment");
+                    b.HasIndex("NormalizedEquipmentIdentifier")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Equipment_NormalizedIdentifier");
+
+                    b.ToTable("Equipment", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Equipment_Description_NotBlank", "\"Description\" IS NULL OR length(btrim(\"Description\")) > 0");
+
+                            t.HasCheckConstraint("CK_Equipment_Identifier_NotBlank", "length(btrim(\"EquipmentIdentifier\")) > 0");
+
+                            t.HasCheckConstraint("CK_Equipment_Name_NotBlank", "length(btrim(\"EquipmentName\")) > 0");
+                        });
                 });
 
             modelBuilder.Entity("EquipmentBorrowing.Domain.Entities.Student", b =>
                 {
                     b.Property<int>("StudentId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ContactInformation")
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsAllowedToBorrow")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("NormalizedStudentNumber")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("text")
+                        .HasComputedColumnSql("lower(btrim(\"StudentNumber\"))", true);
 
                     b.Property<string>("StudentName")
                         .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
-                    b.Property<int>("StudentYear")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("StudentNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("StudentYear")
+                        .HasColumnType("integer");
 
                     b.HasKey("StudentId");
 
-                    b.HasIndex("StudentName")
-                        .IsUnique();
+                    b.HasIndex("NormalizedStudentNumber")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Students_NormalizedStudentNumber");
 
-                    b.ToTable("Students");
+                    b.HasIndex("StudentName");
+
+                    b.ToTable("Students", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Students_Contact_NotBlank", "\"ContactInformation\" IS NULL OR length(btrim(\"ContactInformation\")) > 0");
+
+                            t.HasCheckConstraint("CK_Students_StudentName_NotBlank", "length(btrim(\"StudentName\")) > 0");
+
+                            t.HasCheckConstraint("CK_Students_StudentNumber_NotBlank", "length(btrim(\"StudentNumber\")) > 0");
+                        });
                 });
 
             modelBuilder.Entity("EquipmentBorrowing.Domain.Entities.Borrowing", b =>
@@ -101,13 +173,13 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
                     b.HasOne("EquipmentBorrowing.Domain.Entities.Equipment", "Equipment")
                         .WithMany()
                         .HasForeignKey("EquipmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EquipmentBorrowing.Domain.Entities.Student", "Student")
                         .WithMany()
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Equipment");
