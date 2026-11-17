@@ -1,36 +1,35 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 
 namespace EquipmentBorrowing.Infrastructure.Persistence;
 
-public sealed class EquipmentBorrowingDbContextFactory
-    : IDesignTimeDbContextFactory<EquipmentBorrowingDbContext>
+/// <summary>
+/// Creates independent database contexts for runtime operations.
+/// The caller is responsible for disposing each created context.
+/// </summary>
+public sealed class EquipmentBorrowingContextFactory
+    : IDbContextFactory<EquipmentBorrowingDbContext>
 {
-    public EquipmentBorrowingDbContext CreateDbContext(
-        string[] args)
+    private readonly DbContextOptions<EquipmentBorrowingDbContext>
+        _options;
+
+    public EquipmentBorrowingContextFactory(
+        DbContextOptions<EquipmentBorrowingDbContext> options)
     {
-        const string variableName =
-            "EQUIPMENTBORROWING_CONNECTION_STRING";
+        _options = options
+            ?? throw new ArgumentNullException(nameof(options));
+    }
 
-        string? connectionString =
-            Environment.GetEnvironmentVariable(variableName);
+    public EquipmentBorrowingDbContext CreateDbContext()
+    {
+        return new EquipmentBorrowingDbContext(_options);
+    }
 
-        if (string.IsNullOrWhiteSpace(connectionString))
-        {
-            throw new InvalidOperationException(
-                $"Missing {variableName}. " +
-                "Set the PostgreSQL connection string " +
-                "in your local environment before running " +
-                "EF Core migration commands.");
-        }
+    public Task<EquipmentBorrowingDbContext> CreateDbContextAsync(
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
 
-        var optionsBuilder =
-            new DbContextOptionsBuilder<EquipmentBorrowingDbContext>();
-
-        optionsBuilder.UseNpgsql(connectionString);
-
-        return new EquipmentBorrowingDbContext(
-            optionsBuilder.Options);
+        return Task.FromResult(CreateDbContext());
     }
 }
