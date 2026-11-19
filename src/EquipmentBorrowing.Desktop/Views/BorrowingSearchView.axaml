@@ -1,0 +1,92 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
+    xmlns:domain="using:EquipmentBorrowing.Domain.Entities"
+    x:Class="EquipmentBorrowing.Desktop.Views.BorrowingSearchView"
+    x:DataType="vm:BorrowingSearchViewModel">
+
+    <Grid Margin="20" RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="12">
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Text="Search Borrowings" FontSize="24" FontWeight="Bold"/>
+            <TextBlock Text="Find active and returned borrowings by student name, institutional number, or equipment name."
+                       TextWrapping="Wrap" Opacity="0.75"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="2*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+            <TextBox Grid.Column="0" Text="{Binding SearchText, Mode=TwoWay}"
+                     PlaceholderText="Search student name, number or equipment name"/>
+
+            <ComboBox Grid.Column="1" Width="125" SelectedIndex="{Binding SelectedStatusIndex, Mode=TwoWay}">
+                <ComboBoxItem Content="All statuses"/>
+                <ComboBoxItem Content="Active"/>
+                <ComboBoxItem Content="Returned"/>
+            </ComboBox>
+
+            <ComboBox Grid.Column="2" Width="170" SelectedIndex="{Binding SelectedSortFieldIndex, Mode=TwoWay}">
+                <ComboBoxItem Content="Checkout date"/>
+                <ComboBoxItem Content="Expected return date"/>
+            </ComboBox>
+
+            <ComboBox Grid.Column="3" Width="130" SelectedIndex="{Binding SelectedDirectionIndex, Mode=TwoWay}">
+                <ComboBoxItem Content="Ascending"/>
+                <ComboBoxItem Content="Descending"/>
+            </ComboBox>
+
+            <Button Grid.Column="4" Content="Search" Command="{Binding SearchCommand}"
+                    IsEnabled="{Binding !IsBusy}"/>
+            <Button Grid.Column="5" Content="Clear" Command="{Binding ClearCommand}"
+                    IsEnabled="{Binding !IsBusy}"/>
+        </Grid>
+
+        <TextBlock Grid.Row="2" Text="Borrowing records — read-only" FontWeight="SemiBold"/>
+
+        <Border Grid.Row="3" BorderBrush="#CCCCCC" BorderThickness="1"
+                CornerRadius="6" Padding="10">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Borrowings}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="domain:Borrowing">
+                            <Border BorderBrush="#DDDDDD" BorderThickness="0,0,0,1" Padding="4,9">
+                                <Grid ColumnDefinitions="170,170,110,125,100,115,70" ColumnSpacing="12">
+                                    <StackPanel Grid.Column="0" Spacing="3">
+                                        <TextBlock Text="Student" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Student.StudentName}" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Student.StudentNumber}" FontSize="12"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="3">
+                                        <TextBlock Text="Equipment" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Equipment.EquipmentName}" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Equipment.EquipmentIdentifier}" FontSize="12"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Spacing="3">
+                                        <TextBlock Text="Checkout" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding BorrowedAt}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="3" Spacing="3">
+                                        <TextBlock Text="Expected return" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding ExpectedReturnDate}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="4" Spacing="3">
+                                        <TextBlock Text="Status" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Status}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="5" Spacing="3">
+                                        <TextBlock Text="Actual return" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding ActualReturnDate, TargetNullValue='—'}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="6" Spacing="3">
+                                        <TextBlock Text="ID" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding BorrowingId}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <TextBlock Grid.Row="4" Text="{Binding StatusMessage}" TextWrapping="Wrap"/>
+    </Grid>
+</UserControl>

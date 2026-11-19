@@ -12,6 +12,7 @@ public partial class MainWindow : Window
     private StudentManagementView? _studentManagementView;
     private BorrowingHistoryView? _studentHistoryView;
     private BorrowingHistoryView? _equipmentHistoryView;
+    private BorrowingSearchView? _borrowingSearchView;
 
     public MainWindow()
     {
@@ -24,7 +25,8 @@ public partial class MainWindow : Window
         ActiveBorrowingsView activeBorrowingsView,
         StudentManagementView studentManagementView,
         BorrowingHistoryView studentHistoryView,
-        BorrowingHistoryView equipmentHistoryView)
+        BorrowingHistoryView equipmentHistoryView,
+        BorrowingSearchView borrowingSearchView)
     {
         _equipmentView = equipmentView;
         _borrowView = borrowView;
@@ -32,6 +34,7 @@ public partial class MainWindow : Window
         _studentManagementView = studentManagementView;
         _studentHistoryView = studentHistoryView;
         _equipmentHistoryView = equipmentHistoryView;
+        _borrowingSearchView = borrowingSearchView;
 
         // Default screen.
         ContentArea.Content = _equipmentView;
@@ -84,5 +87,10 @@ public partial class MainWindow : Window
     private void EquipmentHistoryButton_Click(object? sender, RoutedEventArgs e)
     {
         if (_equipmentHistoryView is not null) ContentArea.Content = _equipmentHistoryView;
+    }
+    private void SearchBorrowingsButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_borrowingSearchView is not null)
+            ContentArea.Content = _borrowingSearchView;
     }
 }

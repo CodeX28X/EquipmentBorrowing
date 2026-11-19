@@ -42,6 +42,7 @@
 
                 <Button Content="Student History" Click="StudentHistoryButton_Click"/>
                 <Button Content="Equipment History" Click="EquipmentHistoryButton_Click"/>
+                <Button Content="Search Borrowings" Click="SearchBorrowingsButton_Click"/>
 
 				<!-- UC-12 to UC-14 -->
 				<Button
