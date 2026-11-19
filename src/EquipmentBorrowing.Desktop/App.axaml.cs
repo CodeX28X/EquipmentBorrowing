@@ -57,13 +57,21 @@ public partial class App : Avalonia.Application
             var borrowingReader =
                 new EfActiveBorrowingsReader(contextFactory);
 
-            // Transaction-safe write service.
             var atomicBorrowingService =
                 new PostgreSqlAtomicBorrowingService(contextFactory);
 
+            var equipmentManagementService =
+                new PostgreSqlEquipmentManagementService(contextFactory);
+
             // Equipment catalog.
             var equipmentViewModel =
-                new EquipmentViewModel(equipmentReader);
+                new EquipmentViewModel(
+                    equipmentReader,
+                    equipmentManagementService);
+
+
+
+
 
             var equipmentView = new EquipmentView
             {

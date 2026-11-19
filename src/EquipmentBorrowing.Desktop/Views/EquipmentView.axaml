@@ -1,3 +1,4 @@
+
 <UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -11,92 +12,133 @@
         <converters:AvailabilityConverter x:Key="AvailabilityConverter"/>
     </UserControl.Resources>
 
-    <Grid
-        RowDefinitions="Auto,*"
-        Margin="24">
+    <Grid RowDefinitions="Auto,*,Auto"
+          Margin="20"
+          RowSpacing="14">
 
-        <StackPanel
-            Grid.Row="0"
-            Spacing="8">
+        <StackPanel Grid.Row="0" Spacing="6">
+            <TextBlock Text="Equipment Management"
+                       FontSize="24"
+                       FontWeight="Bold"/>
 
             <TextBlock
-                Text="Equipment"
-                FontSize="28"
-                FontWeight="Bold"/>
-
-            <Button
-                Content="Refresh Equipment"
-                Command="{Binding LoadEquipmentCommand}"
-                HorizontalAlignment="Left"/>
-
+                Text="Register new equipment, update existing information, and check availability."
+                TextWrapping="Wrap"/>
         </StackPanel>
 
-        <Border
-            Grid.Row="1"
-            Margin="0,20,0,0"
-            BorderThickness="1"
-            Padding="12">
+        <Grid Grid.Row="1"
+              ColumnDefinitions="1.1*,1*"
+              ColumnSpacing="18">
 
-            <Grid
-                RowDefinitions="Auto,*">
+            <!-- Equipment list -->
+            <Border Grid.Column="0"
+                    BorderBrush="#CCCCCC"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="12">
 
-                <Grid
-                    Grid.Row="0"
-                    ColumnDefinitions="100,*,150"
-                    Margin="0,0,0,10">
+                <Grid RowDefinitions="Auto,*"
+                      RowSpacing="10">
 
-                    <TextBlock
-                        Grid.Column="0"
-                        Text="ID"
-                        FontWeight="Bold"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Registered equipment"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
 
-                    <TextBlock
-                        Grid.Column="1"
-                        Text="Equipment Name"
-                        FontWeight="Bold"/>
+                        <Button Grid.Column="1"
+                                Content="Refresh"
+                                Command="{Binding LoadEquipmentCommand}"
+                                IsEnabled="{Binding !IsBusy}"/>
+                    </Grid>
 
-                    <TextBlock
-                        Grid.Column="2"
-                        Text="Availability"
-                        FontWeight="Bold"/>
+                    <ListBox Grid.Row="1"
+                             ItemsSource="{Binding Equipment}"
+                             SelectedItem="{Binding SelectedEquipment, Mode=TwoWay}">
 
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="domain:Equipment">
+                                <StackPanel Margin="4" Spacing="3">
+
+                                    <TextBlock
+                                        Text="{Binding EquipmentName}"
+                                        FontWeight="SemiBold"/>
+
+                                    <TextBlock
+                                        Text="{Binding EquipmentIdentifier}"
+                                        FontSize="12"/>
+
+                                    <TextBlock
+                                        Text="{Binding IsAvailable, Converter={StaticResource AvailabilityConverter}}"
+                                        FontSize="12"/>
+
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+
+                    </ListBox>
                 </Grid>
+            </Border>
 
-                <ItemsControl
-                    Grid.Row="1"
-                    ItemsSource="{Binding Equipment}">
+            <!-- Equipment registration/edit form -->
+            <Border Grid.Column="1"
+                    BorderBrush="#CCCCCC"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16">
 
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate
-                            x:DataType="domain:Equipment">
+                <ScrollViewer>
+                    <StackPanel Spacing="10">
 
-                            <Grid
-                                ColumnDefinitions="100,*,150"
-                                Margin="0,6">
+                        <TextBlock Text="{Binding FormTitle}"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"/>
 
-                                <TextBlock
-                                    Grid.Column="0"
-                                    Text="{Binding EquipmentId}"/>
+                        <TextBlock Text="Equipment identifier *"/>
 
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Text="{Binding EquipmentName}"/>
+                        <TextBox
+                            Text="{Binding EquipmentIdentifier, Mode=TwoWay}"
+                            PlaceholderText="e.g. LAPTOP-005"/>
 
-                                <TextBlock
-                                    Grid.Column="2"
-                                    Text="{Binding IsAvailable, Converter={StaticResource AvailabilityConverter}}"/>
+                        <TextBlock Text="Equipment name *"/>
 
-                            </Grid>
+                        <TextBox
+                            Text="{Binding EquipmentName, Mode=TwoWay}"
+                            PlaceholderText="e.g. Dell Laptop"/>
 
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
+                        <TextBlock Text="Description (optional)"/>
 
-                </ItemsControl>
+                        <TextBox
+                            Text="{Binding Description, Mode=TwoWay}"
+                            PlaceholderText="Enter equipment description"
+                            AcceptsReturn="True"
+                            TextWrapping="Wrap"
+                            MinHeight="75"/>
 
-            </Grid>
+                        <TextBlock
+                            Text="{Binding SelectedEquipment.IsAvailable,
+                                StringFormat='Currently available: {0}'}"
+                            IsVisible="{Binding IsEditing}"/>
 
-        </Border>
+                        <Button
+                            Content="Save equipment"
+                            HorizontalAlignment="Stretch"
+                            IsEnabled="{Binding !IsBusy}"
+                            Command="{Binding SaveCommand}"/>
+
+                        <Button
+                            Content="New equipment"
+                            HorizontalAlignment="Stretch"
+                            IsEnabled="{Binding !IsBusy}"
+                            Command="{Binding NewEquipmentCommand}"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <TextBlock Grid.Row="2"
+                   Text="{Binding StatusMessage}"
+                   TextWrapping="Wrap"/>
 
     </Grid>
-
 </UserControl>
