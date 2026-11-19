@@ -56,9 +56,12 @@ public partial class App : Avalonia.Application
             var borrowingReader =
                 new EfActiveBorrowingsReader(contextFactory);
 
+
+            // UC-07/UC-08: Student and equipment borrowing histories.
             var historyReader =
                 new EfBorrowingHistoryReader(contextFactory);
 
+            // UC-09: Search, filter, and sort borrowings.
             var searchReader =
                 new EfBorrowingSearchReader(contextFactory);
 
@@ -108,7 +111,7 @@ public partial class App : Avalonia.Application
                     DataContext = activeBorrowingsViewModel
                 };
 
-            // Student Managaemnt.
+            // Student Management.
 
             var studentManagementService =
                  new PostgreSqlStudentManagementService(contextFactory);
