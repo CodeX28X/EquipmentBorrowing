@@ -3,137 +3,71 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
     xmlns:domain="using:EquipmentBorrowing.Domain.Entities"
-    xmlns:converters="using:EquipmentBorrowing.Desktop.Converters"
-    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     x:Class="EquipmentBorrowing.Desktop.Views.BorrowView"
     x:DataType="vm:BorrowViewModel">
 
-	<UserControl.Resources>
+    <Grid RowDefinitions="Auto,Auto,*,Auto,Auto,Auto"
+          RowSpacing="12" Margin="24">
 
-		<converters:EquipmentDisplayConverter
-            x:Key="EquipmentDisplayConverter"/>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="14">
+            <TextBlock Text="Atomic Multi-Item Checkout"
+                       FontSize="24" FontWeight="Bold"/>
+            <Button Content="Refresh Data" Command="{Binding LoadCommand}"/>
+        </StackPanel>
 
-	</UserControl.Resources>
+        <StackPanel Grid.Row="1" Spacing="6"
+                    IsEnabled="{Binding !IsBusy}">
+            <TextBlock Text="Student" FontWeight="SemiBold"/>
+            <ComboBox ItemsSource="{Binding Students}"
+                      SelectedItem="{Binding SelectedStudent, Mode=TwoWay}"
+                      HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="domain:Student">
+                        <TextBlock Text="{Binding StudentName}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Text="{Binding CapacityMessage}" TextWrapping="Wrap"/>
+        </StackPanel>
 
-	<Grid
-        RowDefinitions="Auto,Auto,Auto,Auto,Auto,*"
-        Margin="30"
-        RowSpacing="16">
+        <Border Grid.Row="2" BorderBrush="#CCCCCC"
+                BorderThickness="1" CornerRadius="8" Padding="10">
+            <Grid RowDefinitions="Auto,*" RowSpacing="8"
+                  IsEnabled="{Binding !IsBusy}">
+                <TextBlock Text="Equipment — select 1 to 3 available items"
+                           FontWeight="SemiBold"/>
+                <ListBox Grid.Row="1" ItemsSource="{Binding EquipmentChoices}"
+                         SelectionMode="Single">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SelectableEquipmentItem">
+                            <CheckBox Content="{Binding DisplayName}"
+                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                      IsEnabled="{Binding IsAvailable}"
+                                      Padding="4"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
 
-		<!-- TITLE -->
-		<StackPanel
-			Grid.Row="0"
-			Orientation="Horizontal"
-			Spacing="15">
-
-			<TextBlock
-				Text="Borrow Equipment"
-				FontSize="28"
-				FontWeight="Bold"/>
-
-			<Button
-				Content="Refresh Data"
-				Command="{Binding LoadCommand}"
-				VerticalAlignment="Center"/>
-
-		</StackPanel>
-
-
-		<!-- STUDENT -->
-		<StackPanel
-            Grid.Row="1"
-            Spacing="6">
-
-			<TextBlock
-                Text="Student"
-                FontWeight="Bold"/>
-
-			<ComboBox
-                ItemsSource="{Binding Students}"
-                SelectedItem="{Binding SelectedStudent}"
-                HorizontalAlignment="Stretch">
-
-				<ComboBox.ItemTemplate>
-					<DataTemplate>
-						<TextBlock
-                            Text="{Binding StudentName}"/>
-					</DataTemplate>
-				</ComboBox.ItemTemplate>
-
-			</ComboBox>
-
-		</StackPanel>
-
-<!-- EQUIPMENT -->
-<StackPanel
-    Grid.Row="2"
-    Spacing="6">
-
-    <TextBlock
-        Text="Equipment"
-        FontWeight="Bold"/>
-
-    <ComboBox
-        ItemsSource="{Binding Equipment}"
-        SelectedItem="{Binding SelectedEquipment}"
-        HorizontalAlignment="Stretch">
-
-
-        <ComboBox.ItemTemplate>
-            <DataTemplate
-                x:DataType="domain:Equipment">
-
-                <TextBlock
-                    Text="{Binding Converter={StaticResource EquipmentDisplayConverter}}"/>
-
-            </DataTemplate>
-        </ComboBox.ItemTemplate>
-
-    </ComboBox>
-
-</StackPanel>
-
-		<!-- EXPECTED RETURN DATE -->
-		<StackPanel
-            Grid.Row="3"
-            Spacing="6">
-
-			<TextBlock
-                Text="Expected Return Date"
-                FontWeight="Bold"/>
-
-			<CalendarDatePicker
-                SelectedDate="{Binding ExpectedReturnDate}"
+        <StackPanel Grid.Row="3" Spacing="6"
+                    IsEnabled="{Binding !IsBusy}">
+            <TextBlock Text="Common expected return date"
+                       FontWeight="SemiBold"/>
+            <CalendarDatePicker
+                SelectedDate="{Binding ExpectedReturnDate, Mode=TwoWay}"
                 PlaceholderText="Select expected return date"
-                DisplayDateStart="{x:Static sys:DateTime.Today}"
                 HorizontalAlignment="Stretch"/>
+        </StackPanel>
 
-		</StackPanel>
+        <Button Grid.Row="4" Content="Checkout selected equipment atomically"
+                Command="{Binding BorrowEquipmentCommand}"
+                HorizontalAlignment="Left" Padding="18,10"
+                IsEnabled="{Binding !IsBusy}"/>
 
-
-		<!-- BORROW BUTTON -->
-		<Button
-            Grid.Row="4"
-            Content="Borrow Equipment"
-            Command="{Binding BorrowEquipmentCommand}"
-            HorizontalAlignment="Left"
-            Padding="20,10"/>
-
-
-		<!-- RESULT -->
-		<Border
-			Grid.Row="5"
-			Padding="10"
-			BorderThickness="1"
-			CornerRadius="6"
-			Margin="0,10,0,0">
-
-			<TextBlock
-				Text="{Binding StatusMessage}"
-				TextWrapping="Wrap" />
-
-		</Border>
-
-	</Grid>
-
+        <Border Grid.Row="5" Padding="10" BorderThickness="1"
+                BorderBrush="#CCCCCC" CornerRadius="6">
+            <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap"/>
+        </Border>
+    </Grid>
 </UserControl>

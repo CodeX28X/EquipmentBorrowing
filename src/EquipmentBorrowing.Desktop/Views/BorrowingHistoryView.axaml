@@ -1,0 +1,92 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
+    xmlns:domain="using:EquipmentBorrowing.Domain.Entities"
+    x:Class="EquipmentBorrowing.Desktop.Views.BorrowingHistoryView"
+    x:DataType="vm:BorrowingHistoryViewModel">
+    <Grid Margin="20" RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="12">
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Text="{Binding PageTitle}" FontSize="24" FontWeight="Bold"/>
+            <TextBlock Text="{Binding Instruction}" TextWrapping="Wrap" Opacity="0.75"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <ComboBox Grid.Column="0" IsVisible="{Binding IsStudentMode}"
+                      ItemsSource="{Binding Students}"
+                      SelectedItem="{Binding SelectedStudent, Mode=TwoWay}"
+                      PlaceholderText="Select a student" HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="domain:Student">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding StudentName}"/>
+                            <TextBlock Text="{Binding StudentNumber}" Opacity="0.7"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ComboBox Grid.Column="0" IsVisible="{Binding IsEquipmentMode}"
+                      ItemsSource="{Binding EquipmentItems}"
+                      SelectedItem="{Binding SelectedEquipment, Mode=TwoWay}"
+                      PlaceholderText="Select equipment" HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="domain:Equipment">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding EquipmentIdentifier}"/>
+                            <TextBlock Text="{Binding EquipmentName}" Opacity="0.7"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Button Grid.Column="1" Content="Refresh History"
+                    Command="{Binding RefreshHistoryCommand}"/>
+            <Button Grid.Column="2" Content="Reload Selection List"
+                    Command="{Binding LoadCommand}"/>
+        </Grid>
+
+        <TextBlock Grid.Row="2" Text="Borrowing records (active and returned)" FontWeight="SemiBold"/>
+
+        <Border Grid.Row="3" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="6" Padding="10">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding History}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="domain:Borrowing">
+                            <Border BorderBrush="#DDDDDD" BorderThickness="0,0,0,1"
+                                    Padding="4,9" Margin="0,0,0,3">
+                                <Grid ColumnDefinitions="190,190,120,125,115,125" ColumnSpacing="10">
+                                    <StackPanel Grid.Column="0" Spacing="3">
+                                        <TextBlock Text="Student" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Student.StudentName}" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Student.StudentNumber}" FontSize="12"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="3">
+                                        <TextBlock Text="Equipment" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Equipment.EquipmentName}" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Equipment.EquipmentIdentifier}" FontSize="12"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Spacing="3">
+                                        <TextBlock Text="Checkout" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding BorrowedAt}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="3" Spacing="3">
+                                        <TextBlock Text="Expected Return" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding ExpectedReturnDate}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="4" Spacing="3">
+                                        <TextBlock Text="Status" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Status}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="5" Spacing="3">
+                                        <TextBlock Text="Actual Return" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding ActualReturnDate, TargetNullValue='—'}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+        <TextBlock Grid.Row="4" Text="{Binding StatusMessage}" TextWrapping="Wrap"/>
+    </Grid>
+</UserControl>

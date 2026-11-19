@@ -93,7 +93,6 @@ public sealed class BorrowEquipmentService
             DateOnly.FromDateTime(borrowedAt),
             DateOnly.FromDateTime(expectedReturnDate));
 
-
         // 7. Change the equipment's domain state.
         equipment.MarkAsBorrowed();
 

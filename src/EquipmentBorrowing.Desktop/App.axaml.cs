@@ -1,4 +1,3 @@
-
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -57,13 +56,24 @@ public partial class App : Avalonia.Application
             var borrowingReader =
                 new EfActiveBorrowingsReader(contextFactory);
 
-            // Transaction-safe write service.
+            var historyReader =
+                new EfBorrowingHistoryReader(contextFactory);
+
             var atomicBorrowingService =
                 new PostgreSqlAtomicBorrowingService(contextFactory);
 
+            var equipmentManagementService =
+                new PostgreSqlEquipmentManagementService(contextFactory);
+
             // Equipment catalog.
             var equipmentViewModel =
-                new EquipmentViewModel(equipmentReader);
+                new EquipmentViewModel(
+                    equipmentReader,
+                    equipmentManagementService);
+
+
+
+
 
             var equipmentView = new EquipmentView
             {
@@ -75,6 +85,7 @@ public partial class App : Avalonia.Application
                 new BorrowViewModel(
                     studentReader,
                     equipmentReader,
+                    borrowingReader,
                     atomicBorrowingService);
 
             var borrowView = new BorrowView
@@ -110,6 +121,21 @@ public partial class App : Avalonia.Application
                     DataContext = studentManagementViewModel
                 };
 
+            // UC-07/UC-08: independent read-only history views.
+            var studentHistoryView = new BorrowingHistoryView
+            {
+                DataContext = new BorrowingHistoryViewModel(
+                    BorrowingHistoryMode.Student,
+                    historyReader, studentReader, equipmentReader)
+            };
+
+            var equipmentHistoryView = new BorrowingHistoryView
+            {
+                DataContext = new BorrowingHistoryViewModel(
+                    BorrowingHistoryMode.Equipment,
+                    historyReader, studentReader, equipmentReader)
+            };
+
             // Main window.
             var mainWindow = new MainWindow();
 
@@ -118,7 +144,9 @@ public partial class App : Avalonia.Application
                 equipmentView,
                 borrowView,
                 activeBorrowingsView,
-                studentManagementView);
+                studentManagementView,
+                studentHistoryView,
+                equipmentHistoryView);
 
 
             desktop.MainWindow = mainWindow;

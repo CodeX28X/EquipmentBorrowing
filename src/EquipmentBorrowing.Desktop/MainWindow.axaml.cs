@@ -1,4 +1,3 @@
-
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using EquipmentBorrowing.Desktop.Views;
@@ -11,6 +10,8 @@ public partial class MainWindow : Window
     private BorrowView? _borrowView;
     private ActiveBorrowingsView? _activeBorrowingsView;
     private StudentManagementView? _studentManagementView;
+    private BorrowingHistoryView? _studentHistoryView;
+    private BorrowingHistoryView? _equipmentHistoryView;
 
     public MainWindow()
     {
@@ -21,12 +22,16 @@ public partial class MainWindow : Window
         EquipmentView equipmentView,
         BorrowView borrowView,
         ActiveBorrowingsView activeBorrowingsView,
-        StudentManagementView studentManagementView)
+        StudentManagementView studentManagementView,
+        BorrowingHistoryView studentHistoryView,
+        BorrowingHistoryView equipmentHistoryView)
     {
         _equipmentView = equipmentView;
         _borrowView = borrowView;
         _activeBorrowingsView = activeBorrowingsView;
         _studentManagementView = studentManagementView;
+        _studentHistoryView = studentHistoryView;
+        _equipmentHistoryView = equipmentHistoryView;
 
         // Default screen.
         ContentArea.Content = _equipmentView;
@@ -70,5 +75,14 @@ public partial class MainWindow : Window
         {
             ContentArea.Content = _studentManagementView;
         }
+    }
+    private void StudentHistoryButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_studentHistoryView is not null) ContentArea.Content = _studentHistoryView;
+    }
+
+    private void EquipmentHistoryButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_equipmentHistoryView is not null) ContentArea.Content = _equipmentHistoryView;
     }
 }

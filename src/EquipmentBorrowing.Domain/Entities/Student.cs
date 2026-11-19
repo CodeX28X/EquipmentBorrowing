@@ -37,10 +37,10 @@ public class Student
         StudentId = studentId;
 
         UpdateInformation(
-    studentNumber,
-    studentName,
-    contactInformation,
-    studentYear);
+            studentNumber,
+            studentName,
+            contactInformation,
+            studentYear);
 
         if (studentYear is <= 0)
         {

@@ -3,9 +3,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     x:Class="EquipmentBorrowing.Desktop.MainWindow"
     Title="Equipment Borrowing System"
-    Width="1100"
+    Width="1300"
     Height="720"
-    MinWidth="850"
+    MinWidth="1050"
     MinHeight="550">
 
 	<DockPanel>
@@ -39,6 +39,9 @@
 				<Button
                     Content="Active Borrowings"
                     Click="ActiveBorrowingsButton_Click"/>
+
+                <Button Content="Student History" Click="StudentHistoryButton_Click"/>
+                <Button Content="Equipment History" Click="EquipmentHistoryButton_Click"/>
 
 				<!-- UC-12 to UC-14 -->
 				<Button
