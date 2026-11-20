@@ -37,47 +37,68 @@
                     CornerRadius="8"
                     Padding="12">
 
-                <Grid RowDefinitions="Auto,*"
-                      RowSpacing="10">
 
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Text="Registered equipment"
-                                   FontWeight="SemiBold"
-                                   VerticalAlignment="Center"/>
+				<Grid RowDefinitions="Auto,Auto,Auto,*"
+					  RowSpacing="10">
 
-                        <Button Grid.Column="1"
-                                Content="Refresh"
-                                Command="{Binding LoadEquipmentCommand}"
-                                IsEnabled="{Binding !IsBusy}"/>
-                    </Grid>
+					<!-- Equipment list heading and refresh -->
+					<Grid Grid.Row="0"
+						  ColumnDefinitions="*,Auto">
 
-                    <ListBox Grid.Row="1"
-                             ItemsSource="{Binding Equipment}"
-                             SelectedItem="{Binding SelectedEquipment, Mode=TwoWay}">
+						<TextBlock Text="Registered equipment"
+								   FontWeight="SemiBold"
+								   VerticalAlignment="Center"/>
 
-                        <ListBox.ItemTemplate>
-                            <DataTemplate x:DataType="domain:Equipment">
-                                <StackPanel Margin="4" Spacing="3">
+						<Button Grid.Column="1"
+								Content="Refresh"
+								Command="{Binding LoadEquipmentCommand}"
+								IsEnabled="{Binding !IsBusy}"/>
+					</Grid>
 
-                                    <TextBlock
-                                        Text="{Binding EquipmentName}"
-                                        FontWeight="SemiBold"/>
+					<!-- UC-02: Availability filter -->
+					<CheckBox Grid.Row="1"
+							  Content="Available only"
+							  IsChecked="{Binding ShowAvailableOnly, Mode=TwoWay}"
+							  IsEnabled="{Binding !IsBusy}"/>
 
-                                    <TextBlock
-                                        Text="{Binding EquipmentIdentifier}"
-                                        FontSize="12"/>
+					<!-- Filter result summary / empty state -->
+					<TextBlock Grid.Row="2"
+							   Text="{Binding FilterStatusMessage}"
+							   FontSize="12"
+							   TextWrapping="Wrap"/>
 
-                                    <TextBlock
-                                        Text="{Binding IsAvailable, Converter={StaticResource AvailabilityConverter}}"
-                                        FontSize="12"/>
+					<!-- Filtered equipment catalog -->
+					<ListBox Grid.Row="3"
+							 ItemsSource="{Binding FilteredEquipment}"
+							 SelectedItem="{Binding SelectedEquipment, Mode=TwoWay}">
 
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
+						<ListBox.ItemTemplate>
+							<DataTemplate x:DataType="domain:Equipment">
 
-                    </ListBox>
-                </Grid>
-            </Border>
+								<StackPanel Margin="4"
+											Spacing="3">
+
+									<TextBlock
+										Text="{Binding EquipmentName}"
+										FontWeight="SemiBold"/>
+
+									<TextBlock
+										Text="{Binding EquipmentIdentifier}"
+										FontSize="12"/>
+
+									<TextBlock
+										Text="{Binding IsAvailable,
+                            Converter={StaticResource AvailabilityConverter}}"
+										FontSize="12"/>
+
+								</StackPanel>
+
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+
+					</ListBox>
+				</Grid>
+			</Border>
 
             <!-- Equipment registration/edit form -->
             <Border Grid.Column="1"
