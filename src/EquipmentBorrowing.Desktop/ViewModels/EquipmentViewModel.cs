@@ -17,6 +17,21 @@ public partial class EquipmentViewModel : ObservableObject
 
     public ObservableCollection<Equipment> Equipment { get; } = new();
 
+
+    public ObservableCollection<Equipment> FilteredEquipment { get; } = new();
+
+    [ObservableProperty]
+    private bool showAvailableOnly;
+
+    [ObservableProperty]
+    private string filterStatusMessage = string.Empty;
+
+    partial void OnShowAvailableOnlyChanged(bool value)
+    {
+        ApplyEquipmentFilter();
+    }
+
+
     [ObservableProperty]
     private Equipment? selectedEquipment;
 
@@ -66,22 +81,76 @@ public partial class EquipmentViewModel : ObservableObject
             value?.Description ?? string.Empty;
     }
 
+
+    private void ApplyEquipmentFilter()
+    {
+        // Preserve the current editor selection only if it
+        // remains visible under the selected filter.
+        if (SelectedEquipment is not null &&
+            ShowAvailableOnly &&
+            !SelectedEquipment.IsAvailable)
+        {
+            SelectedEquipment = null;
+        }
+
+        FilteredEquipment.Clear();
+
+        foreach (Equipment item in Equipment)
+        {
+            if (!ShowAvailableOnly || item.IsAvailable)
+            {
+                FilteredEquipment.Add(item);
+            }
+        }
+
+        if (Equipment.Count == 0)
+        {
+            FilterStatusMessage = "No equipment registered yet.";
+        }
+        else if (ShowAvailableOnly && FilteredEquipment.Count == 0)
+        {
+            FilterStatusMessage = "No available equipment found.";
+        }
+        else if (ShowAvailableOnly)
+        {
+            FilterStatusMessage =
+                $"{FilteredEquipment.Count} of {Equipment.Count} " +
+                "equipment item(s) available.";
+        }
+        else
+        {
+            FilterStatusMessage =
+                $"Showing all {Equipment.Count} equipment item(s).";
+        }
+    }
+
+
+
     private async Task RefreshEquipmentAsync(
         int? selectEquipmentId = null)
     {
         IReadOnlyList<Equipment> equipment =
             await _equipmentRepository.GetAllAsync();
 
+        // Populate the complete equipment collection
+        // using actual records retrieved from PostgreSQL.
         Equipment.Clear();
 
         foreach (Equipment item in equipment)
+        {
             Equipment.Add(item);
+        }
 
         SelectedEquipment = null;
 
+        // Update the visible equipment list.
+        ApplyEquipmentFilter();
+
+        // Restore selection only if the equipment
+        // is visible under the current filter.
         if (selectEquipmentId.HasValue)
         {
-            foreach (Equipment item in Equipment)
+            foreach (Equipment item in FilteredEquipment)
             {
                 if (item.EquipmentId == selectEquipmentId.Value)
                 {
@@ -91,6 +160,7 @@ public partial class EquipmentViewModel : ObservableObject
             }
         }
     }
+
 
     [RelayCommand]
     private async Task LoadEquipmentAsync()
