@@ -1,0 +1,74 @@
+                     MigrationId
+------------------------------------------------------
+ 20261117182213_InitialPostgreSql
+ 20261117182722_AlignEquipmentIdentifierNormalization
+ 20261117192450_AddStudentIdSequence
+ 20261119130134_AddEquipmentIdSequence
+(4 rows)
+
+      table_name
+-----------------------
+ Borrowings
+ Equipment
+ Students
+ __EFMigrationsHistory
+(4 rows)
+
+       table_name        |                constraint_name                | constraint_type |                                                      definition
+-------------------------+-----------------------------------------------+-----------------+----------------------------------------------------------------------------------------------------------------------
+ "__EFMigrationsHistory" | PK___EFMigrationsHistory                      | p               | PRIMARY KEY ("MigrationId")
+ "__EFMigrationsHistory" | __EFMigrationsHistory_MigrationId_not_null    | n               | NOT NULL "MigrationId"
+ "__EFMigrationsHistory" | __EFMigrationsHistory_ProductVersion_not_null | n               | NOT NULL "ProductVersion"
+ "Borrowings"            | Borrowings_BorrowedAt_not_null                | n               | NOT NULL "BorrowedAt"
+ "Borrowings"            | Borrowings_BorrowingId_not_null               | n               | NOT NULL "BorrowingId"
+ "Borrowings"            | Borrowings_EquipmentId_not_null               | n               | NOT NULL "EquipmentId"
+ "Borrowings"            | Borrowings_ExpectedReturnDate_not_null        | n               | NOT NULL "ExpectedReturnDate"
+ "Borrowings"            | Borrowings_Status_not_null                    | n               | NOT NULL "Status"
+ "Borrowings"            | Borrowings_StudentId_not_null                 | n               | NOT NULL "StudentId"
+ "Borrowings"            | CK_Borrowings_ActualReturnDate                | c               | CHECK ((("ActualReturnDate" IS NULL) OR ("ActualReturnDate" >= "BorrowedAt")))
+ "Borrowings"            | CK_Borrowings_ExpectedReturnDate              | c               | CHECK (("ExpectedReturnDate" > "BorrowedAt"))
+ "Borrowings"            | CK_Borrowings_Status                          | c               | CHECK (("Status" = ANY (ARRAY[0, 1])))
+ "Borrowings"            | CK_Borrowings_Status_ReturnDate               | c               | CHECK (((("Status" = 0) AND ("ActualReturnDate" IS NULL)) OR (("Status" = 1) AND ("ActualReturnDate" IS NOT NULL))))
+ "Borrowings"            | FK_Borrowings_Equipment_EquipmentId           | f               | FOREIGN KEY ("EquipmentId") REFERENCES "Equipment"("EquipmentId") ON DELETE RESTRICT
+ "Borrowings"            | FK_Borrowings_Students_StudentId              | f               | FOREIGN KEY ("StudentId") REFERENCES "Students"("StudentId") ON DELETE RESTRICT
+ "Borrowings"            | PK_Borrowings                                 | p               | PRIMARY KEY ("BorrowingId")
+ "Equipment"             | CK_Equipment_Description_NotBlank             | c               | CHECK ((("Description" IS NULL) OR (length(btrim("Description")) > 0)))
+ "Equipment"             | CK_Equipment_Identifier_NotBlank              | c               | CHECK ((length(btrim("EquipmentIdentifier")) > 0))
+ "Equipment"             | CK_Equipment_Name_NotBlank                    | c               | CHECK ((length(btrim("EquipmentName")) > 0))
+ "Equipment"             | Equipment_EquipmentId_not_null                | n               | NOT NULL "EquipmentId"
+ "Equipment"             | Equipment_EquipmentIdentifier_not_null        | n               | NOT NULL "EquipmentIdentifier"
+ "Equipment"             | Equipment_EquipmentName_not_null              | n               | NOT NULL "EquipmentName"
+ "Equipment"             | Equipment_IsAvailable_not_null                | n               | NOT NULL "IsAvailable"
+ "Equipment"             | PK_Equipment                                  | p               | PRIMARY KEY ("EquipmentId")
+ "Students"              | CK_Students_Contact_NotBlank                  | c               | CHECK ((("ContactInformation" IS NULL) OR (length(btrim("ContactInformation")) > 0)))
+ "Students"              | CK_Students_StudentName_NotBlank              | c               | CHECK ((length(btrim("StudentName")) > 0))
+ "Students"              | CK_Students_StudentNumber_NotBlank            | c               | CHECK ((length(btrim("StudentNumber")) > 0))
+ "Students"              | PK_Students                                   | p               | PRIMARY KEY ("StudentId")
+ "Students"              | Students_IsAllowedToBorrow_not_null           | n               | NOT NULL "IsAllowedToBorrow"
+ "Students"              | Students_StudentId_not_null                   | n               | NOT NULL "StudentId"
+ "Students"              | Students_StudentName_not_null                 | n               | NOT NULL "StudentName"
+ "Students"              | Students_StudentNumber_not_null               | n               | NOT NULL "StudentNumber"
+(32 rows)
+
+       tablename       |                indexname                |                                                          indexdef
+-----------------------+-----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------
+ Borrowings            | IX_Borrowings_BorrowedAt                | CREATE INDEX "IX_Borrowings_BorrowedAt" ON public."Borrowings" USING btree ("BorrowedAt")
+ Borrowings            | IX_Borrowings_EquipmentId_BorrowedAt    | CREATE INDEX "IX_Borrowings_EquipmentId_BorrowedAt" ON public."Borrowings" USING btree ("EquipmentId", "BorrowedAt")
+ Borrowings            | IX_Borrowings_Status_ExpectedReturnDate | CREATE INDEX "IX_Borrowings_Status_ExpectedReturnDate" ON public."Borrowings" USING btree ("Status", "ExpectedReturnDate")
+ Borrowings            | IX_Borrowings_StudentId_BorrowedAt      | CREATE INDEX "IX_Borrowings_StudentId_BorrowedAt" ON public."Borrowings" USING btree ("StudentId", "BorrowedAt")
+ Borrowings            | PK_Borrowings                           | CREATE UNIQUE INDEX "PK_Borrowings" ON public."Borrowings" USING btree ("BorrowingId")
+ Borrowings            | UX_Borrowings_ActiveEquipment           | CREATE UNIQUE INDEX "UX_Borrowings_ActiveEquipment" ON public."Borrowings" USING btree ("EquipmentId") WHERE ("Status" = 0)
+ Equipment             | IX_Equipment_EquipmentName              | CREATE INDEX "IX_Equipment_EquipmentName" ON public."Equipment" USING btree ("EquipmentName")
+ Equipment             | IX_Equipment_IsAvailable                | CREATE INDEX "IX_Equipment_IsAvailable" ON public."Equipment" USING btree ("IsAvailable")
+ Equipment             | PK_Equipment                            | CREATE UNIQUE INDEX "PK_Equipment" ON public."Equipment" USING btree ("EquipmentId")
+ Equipment             | UX_Equipment_NormalizedIdentifier       | CREATE UNIQUE INDEX "UX_Equipment_NormalizedIdentifier" ON public."Equipment" USING btree ("NormalizedEquipmentIdentifier")
+ Students              | IX_Students_StudentName                 | CREATE INDEX "IX_Students_StudentName" ON public."Students" USING btree ("StudentName")
+ Students              | PK_Students                             | CREATE UNIQUE INDEX "PK_Students" ON public."Students" USING btree ("StudentId")
+ Students              | UX_Students_NormalizedStudentNumber     | CREATE UNIQUE INDEX "UX_Students_NormalizedStudentNumber" ON public."Students" USING btree ("NormalizedStudentNumber")
+ __EFMigrationsHistory | PK___EFMigrationsHistory                | CREATE UNIQUE INDEX "PK___EFMigrationsHistory" ON public."__EFMigrationsHistory" USING btree ("MigrationId")
+(14 rows)
+
+  student_sequence   |  equipment_sequence
+---------------------+-----------------------
+ "StudentIdSequence" | "EquipmentIdSequence"
+(1 row)

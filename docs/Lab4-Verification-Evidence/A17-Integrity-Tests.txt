@@ -1,0 +1,16 @@
+BEGIN
+psql.exe : psql:C:/Users/Stephen/AppData/Local/Temp/equipment-borrowing-a17.sql:158: NOTICE:  PASS: Valid fixture records inserted
+At line:3 char:1
++ & "C:\Program Files\PostgreSQL\18\bin\psql.exe" `
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (psql:C:/Users/S...ecords inserted:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+psql:C:/Users/Stephen/AppData/Local/Temp/equipment-borrowing-a17.sql:158: NOTICE:  PASS: Duplicate student number rejected
+psql:C:/Users/Stephen/AppData/Local/Temp/equipment-borrowing-a17.sql:158: NOTICE:  PASS: Duplicate equipment identifier rejected
+psql:C:/Users/Stephen/AppData/Local/Temp/equipment-borrowing-a17.sql:158: NOTICE:  PASS: Invalid student reference rejected
+psql:C:/Users/Stephen/AppData/Local/Temp/equipment-borrowing-a17.sql:158: NOTICE:  PASS: Invalid equipment reference rejected
+psql:C:/Users/Stephen/AppData/Local/Temp/equipment-borrowing-a17.sql:158: NOTICE:  PASS: Second active borrowing rejected
+psql:C:/Users/Stephen/AppData/Local/Temp/equipment-borrowing-a17.sql:158: NOTICE:  A17: All five constraint tests passed
+DO
+ROLLBACK

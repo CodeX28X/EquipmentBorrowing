@@ -1,0 +1,63 @@
+*   febc984 (HEAD -> feature/lab4-postgresql-workflows, origin/feature/lab4-postgresql-workflows) Merge remote-tracking branch 'origin/feature/lab4-postgresql-workflows' into feature/lab4-postgresql-workflows
+|\  
+* | 2859e5c (backup/lab4-before-sync) feat: complete borrowing search and PostgreSQL regression tests
+* | 044e7b1 feat: implement atomic multi-item checkout and borrowing histories
+| | *   898211f (origin/main, origin/HEAD) Merge pull request #2 from CodeX28X/feature/lab4-postgresql-workflows
+| | |\  
+| | |/  
+| |/|   
+| * | b5aabbe feat: add PostgreSQL equipment management
+| |/  
+| *   253f744 Merge pull request #1 from CodeX28X/feature/lab4-postgresql-workflows
+| |\  
+| |/  
+|/|   
+* | 236bae0 feat: implement atomic borrowing and student management
+* | e3f4835 feat: integrate PostgreSQL atomic borrowing and add transaction tests
+* | 1a44d98 feat: establish Lab 4 domain and PostgreSQL schema
+* | 356f971 chore: checkpoint Lab 4 PostgreSQL and domain foundation
+* | 5483a25 refactor: establish Lab 4 domain and PostgreSQL mapping foundation
+* | b11a787 style: align equipment availability TextBlock indentation
+|/  
+* 0185332 (main) Update README with Activity 3 architecture documentation and reflections
+* 60121cc Improved the and Replace In-memory dependencies
+* de263ea Implement EF student, EF equipment, and  EF borrowing repository
+* b846b1d Create application DbContext
+* 868f19d added SQLite and EF Core packages
+* 1b6e368 finished the fundamentals
+* 78088e9 Create application DbContext
+* 419a57c Design relational database schema
+* e04b99d Update README for Activity 2
+* 6eaf4e7 Update README for Activity 2
+* efd8b72 Complete desktop integration
+*   bfc6f2e Merge remote changes into main
+|\  
+| * 45af2e4 fixed bug for calendar
+* | 3c59778 Complete active borrowing and return workflow
+|/  
+* c08880a Implemented return equipment method
+* fbcd3c2 (origin/new_branch, new_branch) Prepare student selection for borrow UI
+* c316e3a Inital borrowEquipment UI (still buggy)
+* 90cecb0 Prepare student selection for borrow UI
+* 278e3bb Add equipment listing view
+* 0a90e60 Add equipment listing repository support
+*   23e28a9 Merge branch 'main' of https://github.com/CodeX28X/EquipmentBorrowing
+|\  
+| * 250ecd5 Avalonia Desktop project foundation is added and working.
+* | 3bc3b6f Implement equipment return workflow
+|/  
+* bb57392 docs: update project README
+* 7391ce3 refactor: simplify equipment repository
+* b21972c feat: add console borrowing demonstration
+* 00f6690 docs: update project README
+* 39825b1 refactor: standardize service filename
+* be3cecb test: add application and infrastructure tests
+*   fd6ac36 merge: integrate application and infrastructure layers
+|\  
+| * 9c0f5c0 ADD IN-MEMORY REPOSITORY
+| * 8991b05 IMPLEMENTING BORROWING SERVICES
+| * fc76768 ADDED REPOSITORY ABSTRACTION
+| * 1387097 ADDED DOMAIN MODELS
+* | 4747587 feat: implement domain entities and tests
+|/  
+* ced846d chore: establish initial solution architecture
