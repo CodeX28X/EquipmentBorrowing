@@ -1,0 +1,37 @@
+graph Lab4 {
+graph [rankdir=LR, bgcolor="white", fontname="Arial", nodesep=0.32, ranksep=1.0, pad=0.3, label="Campus Equipment Borrowing System | Laboratory Activity 4", labelloc=t, fontsize=19, fontcolor="#172337"];
+node [fontname="Arial", fontsize=11];
+actor [label="Laboratory Staff /\nEquipment Custodian", shape=box, style="rounded,filled", fillcolor="#FFF4DB", color="#B38227", penwidth=1.6];
+subgraph cluster_system {
+label="Equipment Borrowing System — PostgreSQL"; color="#94A3B8"; style="rounded"; bgcolor="#F8FAFC";
+UC01 [label="UC-01\nView Equipment Catalog", shape=ellipse, style=filled, fillcolor="#E9F0FE", color="#5573A1", penwidth=1.2];
+UC02 [label="UC-02\nFind Available Equipment", shape=ellipse, style=filled, fillcolor="#E9F0FE", color="#5573A1", penwidth=1.2];
+UC03 [label="UC-03\nBorrow Equipment", shape=ellipse, style=filled, fillcolor="#E9F0FE", color="#5573A1", penwidth=1.2];
+UC04 [label="UC-04\nView Active Borrowings", shape=ellipse, style=filled, fillcolor="#E9F0FE", color="#5573A1", penwidth=1.2];
+UC05 [label="UC-05\nReturn Equipment", shape=ellipse, style=filled, fillcolor="#E9F0FE", color="#5573A1", penwidth=1.2];
+UC06 [label="UC-06\nCheck Out Multiple Equipment Items", shape=ellipse, style=filled, fillcolor="#E9F0FE", color="#5573A1", penwidth=1.2];
+UC07 [label="UC-07\nView Student Borrowing History", shape=ellipse, style=filled, fillcolor="#E9F0FE", color="#5573A1", penwidth=1.2];
+UC08 [label="UC-08\nView Equipment Borrowing History", shape=ellipse, style=filled, fillcolor="#E9F0FE", color="#5573A1", penwidth=1.2];
+UC09 [label="UC-09\nSearch, Filter, and Sort Borrowings", shape=ellipse, style=filled, fillcolor="#E9F0FE", color="#5573A1", penwidth=1.2];
+UC12 [label="UC-12\nRegister Student", shape=ellipse, style=filled, fillcolor="#E9F0FE", color="#5573A1", penwidth=1.2];
+UC13 [label="UC-13\nUpdate Student Information", shape=ellipse, style=filled, fillcolor="#E9F0FE", color="#5573A1", penwidth=1.2];
+UC14 [label="UC-14\nChange Student Borrowing Eligibility", shape=ellipse, style=filled, fillcolor="#E9F0FE", color="#5573A1", penwidth=1.2];
+UC15 [label="UC-15\nRegister Equipment", shape=ellipse, style=filled, fillcolor="#E9F0FE", color="#5573A1", penwidth=1.2];
+UC16 [label="UC-16\nUpdate Equipment Information", shape=ellipse, style=filled, fillcolor="#E9F0FE", color="#5573A1", penwidth=1.2];
+}
+edge [color="#718096",penwidth=1.0,dir=none];
+actor -- UC01;
+actor -- UC02;
+actor -- UC03;
+actor -- UC04;
+actor -- UC05;
+actor -- UC06;
+actor -- UC07;
+actor -- UC08;
+actor -- UC09;
+actor -- UC12;
+actor -- UC13;
+actor -- UC14;
+actor -- UC15;
+actor -- UC16;
+}

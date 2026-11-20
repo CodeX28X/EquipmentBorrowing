@@ -1,4 +1,3 @@
-
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -57,6 +56,15 @@ public partial class App : Avalonia.Application
             var borrowingReader =
                 new EfActiveBorrowingsReader(contextFactory);
 
+
+            // UC-07/UC-08: Student and equipment borrowing histories.
+            var historyReader =
+                new EfBorrowingHistoryReader(contextFactory);
+
+            // UC-09: Search, filter, and sort borrowings.
+            var searchReader =
+                new EfBorrowingSearchReader(contextFactory);
+
             var atomicBorrowingService =
                 new PostgreSqlAtomicBorrowingService(contextFactory);
 
@@ -83,6 +91,7 @@ public partial class App : Avalonia.Application
                 new BorrowViewModel(
                     studentReader,
                     equipmentReader,
+                    borrowingReader,
                     atomicBorrowingService);
 
             var borrowView = new BorrowView
@@ -102,7 +111,7 @@ public partial class App : Avalonia.Application
                     DataContext = activeBorrowingsViewModel
                 };
 
-            // Student Managaemnt.
+            // Student Management.
 
             var studentManagementService =
                  new PostgreSqlStudentManagementService(contextFactory);
@@ -118,6 +127,27 @@ public partial class App : Avalonia.Application
                     DataContext = studentManagementViewModel
                 };
 
+            // UC-07/UC-08: independent read-only history views.
+            var studentHistoryView = new BorrowingHistoryView
+            {
+                DataContext = new BorrowingHistoryViewModel(
+                    BorrowingHistoryMode.Student,
+                    historyReader, studentReader, equipmentReader)
+            };
+
+            var equipmentHistoryView = new BorrowingHistoryView
+            {
+                DataContext = new BorrowingHistoryViewModel(
+                    BorrowingHistoryMode.Equipment,
+                    historyReader, studentReader, equipmentReader)
+            };
+
+            // UC-09: read-only PostgreSQL borrowing search.
+            var borrowingSearchView = new BorrowingSearchView
+            {
+                DataContext = new BorrowingSearchViewModel(searchReader)
+            };
+
             // Main window.
             var mainWindow = new MainWindow();
 
@@ -126,7 +156,10 @@ public partial class App : Avalonia.Application
                 equipmentView,
                 borrowView,
                 activeBorrowingsView,
-                studentManagementView);
+                studentManagementView,
+                studentHistoryView,
+                equipmentHistoryView,
+                borrowingSearchView);
 
 
             desktop.MainWindow = mainWindow;

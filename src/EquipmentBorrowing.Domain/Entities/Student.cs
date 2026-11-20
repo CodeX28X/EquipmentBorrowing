@@ -37,10 +37,10 @@ public class Student
         StudentId = studentId;
 
         UpdateInformation(
-    studentNumber,
-    studentName,
-    contactInformation,
-    studentYear);
+            studentNumber,
+            studentName,
+            contactInformation,
+            studentYear);
 
         if (studentYear is <= 0)
         {
@@ -54,6 +54,7 @@ public class Student
         // BR-02: Newly registered students are eligible.
         IsAllowedToBorrow = true;
     }
+
 
     public void UpdateInformation(
         string studentNumber,
@@ -75,6 +76,13 @@ public class Student
                 nameof(studentName));
         }
 
+        if (studentYear is <= 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(studentYear),
+                "Student year must be greater than zero when supplied.");
+        }
+
         // BR-01: Trim institutional identifiers.
         StudentNumber = studentNumber.Trim();
 
@@ -87,13 +95,10 @@ public class Student
                 ? null
                 : contactInformation.Trim();
 
-        if (studentYear is <= 0)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(studentYear),
-                "Student year must be greater than zero when supplied.");
-        }
+        // UC-13: Update the student's year when editing.
+        StudentYear = studentYear;
     }
+
 
     public void SetBorrowingEligibility(bool isAllowed)
     {

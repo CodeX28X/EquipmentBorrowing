@@ -1,0 +1,10 @@
+﻿  Determining projects to restore...
+  All projects are up-to-date for restore.
+  EquipmentBorrowing.Domain -> C:\Users\Stephen\source\repos\EquipmentBorrowing\src\EquipmentBorrowing.Domain\bin\Debug\net10.0\EquipmentBorrowing.Domain.dll
+  EquipmentBorrowing.Application -> C:\Users\Stephen\source\repos\EquipmentBorrowing\src\EquipmentBorrowing.Application\bin\Debug\net10.0\EquipmentBorrowing.Application.dll
+  EquipmentBorrowing.Infrastructure -> C:\Users\Stephen\source\repos\EquipmentBorrowing\src\EquipmentBorrowing.Infrastructure\bin\Debug\net10.0\EquipmentBorrowing.Infrastructure.dll
+  EquipmentBorrowing.Tests -> C:\Users\Stephen\source\repos\EquipmentBorrowing\tests\EquipmentBorrowing.Tests\bin\Debug\net10.0\EquipmentBorrowing.Tests.dll
+Test run for C:\Users\Stephen\source\repos\EquipmentBorrowing\tests\EquipmentBorrowing.Tests\bin\Debug\net10.0\EquipmentBorrowing.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 1 s - EquipmentBorrowing.Tests.dll (net10.0)
