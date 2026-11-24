@@ -90,7 +90,8 @@ public sealed class PostgreSqlStudentManagementService
             when (IsDuplicateIdentifier(exception))
         {
             return StudentOperationResult.Rejected(
-                "This student number is already registered.");
+                "This student number is already registered.",
+                OperationErrorKind.Conflict);
         }
         catch (ArgumentException exception)
         {
@@ -100,10 +101,12 @@ public sealed class PostgreSqlStudentManagementService
         catch (InvalidOperationException exception)
         {
             // Used below for an absent student.
-            // Other unexpected errors will be represented as failures.
             if (exception.Message == "Student does not exist.")
+            {
                 return StudentOperationResult.Rejected(
-                    exception.Message);
+                    exception.Message,
+                    OperationErrorKind.NotFound);
+            }
 
             return StudentOperationResult.Failed(
                 "Student operation could not be completed.");
@@ -213,6 +216,71 @@ public sealed class PostgreSqlStudentManagementService
                     name,
                     contact,
                     studentYear);
+
+                return (
+                    student.StudentId,
+                    "Student information updated successfully."
+                );
+            },
+            cancellationToken);
+    }
+
+    public Task<StudentOperationResult> UpdateProfileAsync(
+    int studentId,
+    string studentNumber,
+    string studentName,
+    string? contactInformation,
+    CancellationToken cancellationToken = default)
+    {
+        if (studentId <= 0)
+        {
+            return Task.FromResult(
+                StudentOperationResult.Rejected(
+                    "Select a valid student."));
+        }
+
+        string? validationError =
+            ValidateFields(studentNumber, studentName);
+
+        if (validationError is not null)
+        {
+            return Task.FromResult(
+                StudentOperationResult.Rejected(
+                    validationError));
+        }
+
+        string number = studentNumber.Trim();
+        string name = studentName.Trim();
+        string? contact = NormalizeOptional(
+            contactInformation);
+
+        return ExecuteAsync(
+            async (db, ct) =>
+            {
+                var students = await db.Students
+                    .FromSqlInterpolated(
+                        $"""
+                    SELECT * FROM "Students"
+                    WHERE "StudentId" = {studentId}
+                    FOR UPDATE
+                    """)
+                    .AsTracking()
+                    .ToListAsync(ct);
+
+                Student? student =
+                    students.SingleOrDefault();
+
+                if (student is null)
+                {
+                    throw new InvalidOperationException(
+                        "Student does not exist.");
+                }
+
+                student.UpdateInformation(
+                    number,
+                    name,
+                    contact,
+                    student.StudentYear);
 
                 return (
                     student.StudentId,
