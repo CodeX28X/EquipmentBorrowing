@@ -26,6 +26,8 @@ public partial class ActiveBorrowingsViewModel : ObservableObject
     [ObservableProperty]
     private bool isBusy;
 
+    private bool _refreshRequired;
+
     public ActiveBorrowingsViewModel(
         IActiveBorrowingsReader borrowingsReader,
         IAtomicBorrowingService atomicBorrowingService)
@@ -66,12 +68,13 @@ public partial class ActiveBorrowingsViewModel : ObservableObject
 
             SelectedBorrowing = null;
             StatusMessage = string.Empty;
+            _refreshRequired = false;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            StatusMessage =
-                "Unable to load active borrowings. " +
-                "Check that the API is running and retry.";
+            _refreshRequired = true;
+            StatusMessage = ex is Services.HttpEquipmentBorrowingClient.ApiFailure
+                ? ex.Message : "Unable to refresh records. Try refreshing again.";
         }
         finally
         {
@@ -84,6 +87,12 @@ public partial class ActiveBorrowingsViewModel : ObservableObject
     {
         if (IsBusy)
             return;
+
+        if (_refreshRequired)
+        {
+            StatusMessage = "Refresh this list successfully and verify the records before retrying.";
+            return;
+        }
 
         if (borrowing is null)
         {
@@ -100,6 +109,7 @@ public partial class ActiveBorrowingsViewModel : ObservableObject
                 GetManilaToday());
 
             StatusMessage = result.Message;
+            _refreshRequired = result.ErrorKind != OperationErrorKind.Validation;
 
             if (result.Status ==
                 BorrowingOperationStatus.Success)
@@ -113,6 +123,7 @@ public partial class ActiveBorrowingsViewModel : ObservableObject
                     ActiveBorrowings.Add(item);
 
                 SelectedBorrowing = null;
+                _refreshRequired = false;
             }
             else if (result.Status ==
                      BorrowingOperationStatus.OutcomeUnknown)
@@ -125,6 +136,7 @@ public partial class ActiveBorrowingsViewModel : ObservableObject
         }
         catch (Exception)
         {
+            _refreshRequired = true;
             StatusMessage =
                 "Return did not complete normally. " +
                 "Verify the borrowing records before retrying.";

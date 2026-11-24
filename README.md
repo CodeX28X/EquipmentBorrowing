@@ -1,3 +1,7 @@
+# Lab 5: API Integration and Acceptance Testing
+
+See [Lab 5 setup and evidence](docs/lab5/README.md) for current API/desktop setup, contract, acceptance testing and traceability. The original Lab 4 README follows for historical continuity.
+
 # Equipment Borrowing System — Laboratory Activity 4
 
 A desktop equipment borrowing system built with **C# / .NET 10, Avalonia UI, CommunityToolkit.Mvvm, EF Core 10, Npgsql, and PostgreSQL 18**. This Lab 4 implementation extends the previous project with PostgreSQL persistence, student and equipment management, atomic multi-item checkout, borrowing histories, and borrowing search/filter/sort.

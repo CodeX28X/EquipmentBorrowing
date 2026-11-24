@@ -79,12 +79,12 @@ public partial class BorrowingSearchViewModel : ObservableObject
                 ? "No borrowings match the selected criteria."
                 : $"{results.Count} matching borrowing record(s).";
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // Clear stale results: do not display them as if they matched
             // a query that failed to load.
             Borrowings.Clear();
-            StatusMessage = "Unable to load borrowings from the API. " +
+            StatusMessage = ex is Services.HttpEquipmentBorrowingClient.ApiFailure ? ex.Message : "Unable to load borrowings from the API. " +
                             "Check the connection and choose Search to retry.";
         }
         finally

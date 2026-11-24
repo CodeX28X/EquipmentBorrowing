@@ -50,6 +50,8 @@ public partial class EquipmentViewModel : ObservableObject
     [ObservableProperty]
     private bool isBusy;
 
+    private bool _refreshRequired;
+
     public bool IsEditing => SelectedEquipment is not null;
 
     public string FormTitle =>
@@ -177,11 +179,13 @@ public partial class EquipmentViewModel : ObservableObject
             StatusMessage = Equipment.Count == 0
                 ? "No equipment registered yet."
                 : $"{Equipment.Count} equipment item(s) loaded.";
+            _refreshRequired = false;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            StatusMessage =
-                "Unable to load equipment. Check that the API is running.";
+            _refreshRequired = true;
+            StatusMessage = ex is Services.HttpEquipmentBorrowingClient.ApiFailure
+                ? ex.Message : "Unable to refresh records. Try refreshing again.";
         }
         finally
         {
@@ -204,6 +208,12 @@ public partial class EquipmentViewModel : ObservableObject
     {
         if (IsBusy)
             return;
+
+        if (_refreshRequired)
+        {
+            StatusMessage = "Refresh this list successfully and verify the records before retrying.";
+            return;
+        }
 
         if (string.IsNullOrWhiteSpace(EquipmentIdentifier))
         {
@@ -240,22 +250,25 @@ public partial class EquipmentViewModel : ObservableObject
             }
 
             StatusMessage = result.Message;
+            _refreshRequired = result.ErrorKind != OperationErrorKind.Validation;
 
             if (result.Status == EquipmentOperationStatus.Success)
             {
                 await RefreshEquipmentAsync(result.EquipmentId);
+                _refreshRequired = false;
                 StatusMessage = result.Message;
             }
             else if (result.Status ==
                      EquipmentOperationStatus.OutcomeUnknown)
             {
                 StatusMessage =
-                    "The change may have been saved. " +
+                    result.Message + " " +
                     "Refresh equipment records and verify before retrying.";
             }
         }
         catch (Exception)
         {
+            _refreshRequired = true;
             StatusMessage =
                 "The operation could not be confirmed. " +
                 "Refresh equipment records before retrying.";

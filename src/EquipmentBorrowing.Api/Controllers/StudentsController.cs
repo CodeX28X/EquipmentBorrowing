@@ -104,9 +104,17 @@ public sealed class StudentsController : ControllerBase
                 result.Message);
         }
 
-        var student = await _students.GetByIdAsync(
+        EquipmentBorrowing.Domain.Entities.Student? student;
+        try
+        {
+            student = await _students.GetByIdAsync(
             result.StudentId!.Value,
             cancellationToken);
+        }
+        catch
+        {
+            return OperationErrorKind.OutcomeUnknown.ToErrorResponse("Refresh records.");
+        }
 
         if (student is null)
         {
@@ -156,9 +164,17 @@ public sealed class StudentsController : ControllerBase
                 result.Message);
         }
 
-        var student = await _students.GetByIdAsync(
+        EquipmentBorrowing.Domain.Entities.Student? student;
+        try
+        {
+            student = await _students.GetByIdAsync(
             id,
             cancellationToken);
+        }
+        catch
+        {
+            return OperationErrorKind.OutcomeUnknown.ToErrorResponse("Refresh records.");
+        }
 
         if (student is null)
         {
@@ -203,9 +219,17 @@ public sealed class StudentsController : ControllerBase
                 result.Message);
         }
 
-        var student = await _students.GetByIdAsync(
+        EquipmentBorrowing.Domain.Entities.Student? student;
+        try
+        {
+            student = await _students.GetByIdAsync(
             id,
             cancellationToken);
+        }
+        catch
+        {
+            return OperationErrorKind.OutcomeUnknown.ToErrorResponse("Refresh records.");
+        }
 
         if (student is null)
         {

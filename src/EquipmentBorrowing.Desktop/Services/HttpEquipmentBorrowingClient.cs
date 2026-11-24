@@ -32,7 +32,7 @@ public sealed class HttpEquipmentBorrowingClient : IStudentRepository,
     }
     private sealed record CheckoutDto(BorrowingDto[] Borrowings);
     private sealed record ErrorDto(string Code, string Message);
-    private sealed class ApiFailure : Exception
+    internal sealed class ApiFailure : Exception
     {
         public OperationErrorKind Kind { get; }
         public ApiFailure(OperationErrorKind kind, string message) : base(message) => Kind = kind;
@@ -40,25 +40,34 @@ public sealed class HttpEquipmentBorrowingClient : IStudentRepository,
     private async Task<T?> SendAsync<T>(HttpMethod method, string path, object? body, CancellationToken ct, bool missingAllowed = false) where T : class
     {
         bool mutation = method != HttpMethod.Get;
+        int? receivedStatus = null;
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        deadline.CancelAfter(_http.Timeout);
+        ct = deadline.Token;
         try
         {
             using var request = new HttpRequestMessage(method, path);
             if (body != null) request.Content = JsonContent.Create(body);
-            using var response = await _http.SendAsync(request, ct);
+            using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+            receivedStatus = (int)response.StatusCode;
             if (missingAllowed && response.StatusCode == HttpStatusCode.NotFound) return null;
             if (!response.IsSuccessStatusCode)
             {
                 ErrorDto? error = null;
                 try { error = await response.Content.ReadFromJsonAsync<ErrorDto>(cancellationToken: ct); } catch (System.Text.Json.JsonException) { } catch (NotSupportedException) { }
                 var kind = (int)response.StatusCode switch { 400 => OperationErrorKind.Validation, 404 => OperationErrorKind.NotFound, 409 => OperationErrorKind.Conflict, 500 when error?.Code == "server_error" => OperationErrorKind.ServerError, _ => mutation ? OperationErrorKind.OutcomeUnknown : OperationErrorKind.ServerError };
-                throw new ApiFailure(kind, kind == OperationErrorKind.OutcomeUnknown ? "Operation outcome unknown. Refresh records before retrying." : error?.Message ?? $"API returned HTTP {(int)response.StatusCode}.");
+                throw new ApiFailure(kind, kind == OperationErrorKind.OutcomeUnknown ? $"API returned HTTP {(int)response.StatusCode}. Operation outcome unknown. Refresh records before retrying." : $"API returned HTTP {(int)response.StatusCode}: {error?.Message ?? "Request failed."}");
             }
-            return await response.Content.ReadFromJsonAsync<T>(cancellationToken: ct) ?? throw new ApiFailure(mutation ? OperationErrorKind.OutcomeUnknown : OperationErrorKind.ServerError, "Invalid API response. Refresh before retrying.");
+            return await response.Content.ReadFromJsonAsync<T>(cancellationToken: ct) ?? throw new ApiFailure(mutation ? OperationErrorKind.OutcomeUnknown : OperationErrorKind.ServerError, $"API returned HTTP {receivedStatus}, but the response was empty. Refresh before retrying.");
         }
         catch (ApiFailure) { throw; }
         catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException or System.IO.IOException or System.Text.Json.JsonException or NotSupportedException)
         {
-            throw new ApiFailure(mutation ? OperationErrorKind.OutcomeUnknown : OperationErrorKind.ServerError, mutation ? "No usable API response. Operation outcome unknown; refresh before retrying." : "Unable to read API response. Check that the API is running and refresh.");
+            var detail = receivedStatus.HasValue
+                ? $"API returned HTTP {receivedStatus.Value}, but its response could not be read."
+                : "No HTTP response received. Check that the API is running and the connection is available.";
+            throw new ApiFailure(mutation ? OperationErrorKind.OutcomeUnknown : OperationErrorKind.ServerError,
+                mutation ? detail + " Operation outcome unknown; refresh before retrying." : detail);
         }
     }
     async Task<Student?> IStudentRepository.GetByIdAsync(int id, CancellationToken ct) => (await SendAsync<StudentDto>(HttpMethod.Get, $"students/{id}", null, ct, true))?.ToEntity();

@@ -93,10 +93,10 @@ public partial class BorrowingHistoryViewModel : ObservableObject
             }
             // Otherwise the selection-change callback starts the history query.
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             History.Clear();
-            StatusMessage = "Unable to load the selection list. Check that the API is running and retry.";
+            StatusMessage = ex is Services.HttpEquipmentBorrowingClient.ApiFailure ? ex.Message : "Unable to load the selection list. Check that the API is running and retry.";
             IsBusy = false;
         }
     }
@@ -134,12 +134,12 @@ public partial class BorrowingHistoryViewModel : ObservableObject
                 ? "No borrowing history for the selected record."
                 : $"{results.Count} borrowing record(s) found (active and returned).";
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             if (request == Volatile.Read(ref _requestVersion))
             {
                 History.Clear();
-                StatusMessage = "Unable to load history. Verify the connection, then retry.";
+                StatusMessage = ex is Services.HttpEquipmentBorrowingClient.ApiFailure ? ex.Message : "Unable to load history. Verify the connection, then retry.";
             }
         }
         finally

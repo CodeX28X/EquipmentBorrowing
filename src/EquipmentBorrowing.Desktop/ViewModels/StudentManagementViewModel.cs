@@ -38,6 +38,8 @@ public partial class StudentManagementViewModel : ObservableObject
     [ObservableProperty]
     private bool isBusy;
 
+    private bool _refreshRequired;
+
     public bool IsEditing => SelectedStudent is not null;
 
     public string FormTitle =>
@@ -125,11 +127,13 @@ public partial class StudentManagementViewModel : ObservableObject
             StatusMessage = Students.Count == 0
                 ? "No students registered yet."
                 : $"{Students.Count} student(s) loaded.";
+            _refreshRequired = false;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            StatusMessage =
-                "Unable to load students. Check that the API is running.";
+            _refreshRequired = true;
+            StatusMessage = ex is Services.HttpEquipmentBorrowingClient.ApiFailure
+                ? ex.Message : "Unable to refresh records. Try refreshing again.";
         }
         finally
         {
@@ -152,6 +156,12 @@ public partial class StudentManagementViewModel : ObservableObject
     {
         if (IsBusy)
             return;
+
+        if (_refreshRequired)
+        {
+            StatusMessage = "Refresh this list successfully and verify the records before retrying.";
+            return;
+        }
 
         if (string.IsNullOrWhiteSpace(StudentNumber))
         {
@@ -191,22 +201,25 @@ public partial class StudentManagementViewModel : ObservableObject
             }
 
             StatusMessage = result.Message;
+            _refreshRequired = result.ErrorKind != OperationErrorKind.Validation;
 
             if (result.Status == StudentOperationStatus.Success)
             {
                 await RefreshStudentsAsync(result.StudentId);
+                _refreshRequired = false;
                 StatusMessage = result.Message;
             }
             else if (result.Status ==
                      StudentOperationStatus.OutcomeUnknown)
             {
                 StatusMessage =
-                    "The change may have been saved. " +
+                    result.Message + " " +
                     "Refresh the student list and verify before retrying.";
             }
         }
         catch (Exception)
         {
+            _refreshRequired = true;
             StatusMessage =
                 "The operation could not be confirmed. " +
                 "Refresh the records before trying again.";
@@ -223,6 +236,12 @@ public partial class StudentManagementViewModel : ObservableObject
         if (IsBusy || SelectedStudent is null)
             return;
 
+        if (_refreshRequired)
+        {
+            StatusMessage = "Refresh this list successfully and verify the records before retrying.";
+            return;
+        }
+
         int studentId = SelectedStudent.StudentId;
         bool newEligibility = !SelectedStudent.IsAllowedToBorrow;
 
@@ -235,22 +254,25 @@ public partial class StudentManagementViewModel : ObservableObject
                 newEligibility);
 
             StatusMessage = result.Message;
+            _refreshRequired = result.ErrorKind != OperationErrorKind.Validation;
 
             if (result.Status == StudentOperationStatus.Success)
             {
                 await RefreshStudentsAsync(studentId);
+                _refreshRequired = false;
                 StatusMessage = result.Message;
             }
             else if (result.Status ==
                      StudentOperationStatus.OutcomeUnknown)
             {
                 StatusMessage =
-                    "Eligibility may have changed. " +
+                    result.Message + " " +
                     "Refresh and verify before trying again.";
             }
         }
         catch (Exception)
         {
+            _refreshRequired = true;
             StatusMessage =
                 "Eligibility could not be confirmed. " +
                 "Refresh student records before retrying.";
