@@ -49,9 +49,9 @@ public sealed class ApiExceptionMiddleware
                 StatusCodes.Status500InternalServerError;
 
             await context.Response.WriteAsJsonAsync(
-                new ApiError(
-                    "server_error",
-                    "The server could not complete the request."));
+                HttpMethods.IsGet(context.Request.Method)
+                    ? new ApiError("server_error", "The server could not complete the request.")
+                    : new ApiError("outcome_unknown", "The operation could not be confirmed. Refresh records before retrying."));
         }
     }
 }

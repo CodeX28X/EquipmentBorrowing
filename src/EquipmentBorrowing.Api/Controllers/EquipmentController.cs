@@ -97,10 +97,17 @@ public sealed class EquipmentController : ControllerBase
                 result.Message);
         }
 
-        var equipment =
-            await _equipment.GetByIdAsync(
+        EquipmentBorrowing.Domain.Entities.Equipment? equipment;
+        try
+        {
+            equipment = await _equipment.GetByIdAsync(
                 result.EquipmentId!.Value,
                 cancellationToken);
+        }
+        catch
+        {
+            return OperationErrorKind.OutcomeUnknown.ToErrorResponse("Refresh records.");
+        }
 
         if (equipment is null)
         {
@@ -150,10 +157,17 @@ public sealed class EquipmentController : ControllerBase
                 result.Message);
         }
 
-        var equipment =
-            await _equipment.GetByIdAsync(
+        EquipmentBorrowing.Domain.Entities.Equipment? equipment;
+        try
+        {
+            equipment = await _equipment.GetByIdAsync(
                 id,
                 cancellationToken);
+        }
+        catch
+        {
+            return OperationErrorKind.OutcomeUnknown.ToErrorResponse("Refresh records.");
+        }
 
         if (equipment is null)
         {

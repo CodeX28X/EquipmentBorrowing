@@ -56,6 +56,8 @@ public partial class BorrowViewModel : ObservableObject
     [ObservableProperty]
     private bool isBusy;
 
+    private bool _refreshRequired;
+
     public int SelectedCount => EquipmentChoices.Count(item => item.IsSelected);
 
     private int ActiveCount => SelectedStudent is not null &&
@@ -172,10 +174,13 @@ public partial class BorrowViewModel : ObservableObject
             await RefreshDataAsync(resetStudent: true);
             ExpectedReturnDate = null;
             StatusMessage = "Select a student and 1–3 available items. Multiple items are checked out atomically.";
+            _refreshRequired = false;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            StatusMessage = "Unable to load records. Check that the API is running and retry.";
+            _refreshRequired = true;
+            StatusMessage = ex is Services.HttpEquipmentBorrowingClient.ApiFailure
+                ? ex.Message : "Unable to refresh records. Try refreshing again.";
         }
         finally
         {
@@ -187,6 +192,12 @@ public partial class BorrowViewModel : ObservableObject
     private async Task BorrowEquipmentAsync()
     {
         if (IsBusy) return;
+
+        if (_refreshRequired)
+        {
+            StatusMessage = "Refresh this list successfully and verify the records before retrying.";
+            return;
+        }
 
         if (SelectedStudent is null)
         {
@@ -233,6 +244,7 @@ public partial class BorrowViewModel : ObservableObject
                 studentId, equipmentIds, checkoutDate, returnDate);
 
             StatusMessage = result.Message;
+            _refreshRequired = result.ErrorKind != OperationErrorKind.Validation;
 
             if (result.Status == BorrowingOperationStatus.Success)
             {
@@ -241,6 +253,7 @@ public partial class BorrowViewModel : ObservableObject
                 try
                 {
                     await RefreshDataAsync(resetStudent: false);
+                    _refreshRequired = false;
                     StatusMessage = $"{equipmentIds.Length} equipment item(s) checked out successfully.";
                 }
                 catch (Exception)
@@ -262,6 +275,7 @@ public partial class BorrowViewModel : ObservableObject
         }
         catch (Exception)
         {
+            _refreshRequired = true;
             StatusMessage = "Checkout outcome could not be confirmed. " +
                 "Verify Active Borrowings before attempting another checkout.";
         }
