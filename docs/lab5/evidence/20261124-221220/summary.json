@@ -1,0 +1,32 @@
+[
+  {
+    "test": "T01",
+    "result": "automated checks passed",
+    "limitation": "Full OpenAPI semantic audit pending"
+  },
+  {
+    "test": "T02",
+    "result": "automated checks passed",
+    "limitation": ""
+  },
+  {
+    "test": "T03",
+    "result": "automated checks passed",
+    "limitation": ""
+  },
+  {
+    "test": "T04",
+    "result": "automated checks passed",
+    "limitation": ""
+  },
+  {
+    "test": "T05",
+    "result": "automated checks passed",
+    "limitation": ""
+  },
+  {
+    "test": "T06",
+    "result": "automated checks passed",
+    "limitation": ""
+  }
+]

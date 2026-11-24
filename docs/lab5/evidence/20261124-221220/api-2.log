@@ -1,0 +1,397 @@
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://127.0.0.1:5081
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\Stephen\source\repos\EquipmentBorrowing\src\EquipmentBorrowing.Api
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (96ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear"
+      FROM "Students" AS s
+      ORDER BY s."StudentName", s."StudentId"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Equipment" AS e
+      ORDER BY e."EquipmentName", e."EquipmentId"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (7ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT b."BorrowingId", b."ActualReturnDate", b."BorrowedAt", b."EquipmentId", b."ExpectedReturnDate", b."Status", b."StudentId", s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear", e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Borrowings" AS b
+      INNER JOIN "Students" AS s ON b."StudentId" = s."StudentId"
+      INNER JOIN "Equipment" AS e ON b."EquipmentId" = e."EquipmentId"
+      ORDER BY b."BorrowedAt", b."BorrowingId"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Equipment" AS e
+      ORDER BY e."EquipmentName", e."EquipmentId"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Equipment" AS e
+      ORDER BY e."EquipmentName", e."EquipmentId"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear"
+      FROM "Students" AS s
+      ORDER BY s."StudentName", s."StudentId"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (28ms) [Parameters=[@studentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear"
+      FROM "Students" AS s
+      WHERE s."StudentId" = @studentId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@equipmentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Equipment" AS e
+      WHERE e."EquipmentId" = @equipmentId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[@borrowingId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT b."BorrowingId", b."ActualReturnDate", b."BorrowedAt", b."EquipmentId", b."ExpectedReturnDate", b."Status", b."StudentId", s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear", e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Borrowings" AS b
+      INNER JOIN "Students" AS s ON b."StudentId" = s."StudentId"
+      INNER JOIN "Equipment" AS e ON b."EquipmentId" = e."EquipmentId"
+      WHERE b."BorrowingId" = @borrowingId
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@studentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear"
+      FROM "Students" AS s
+      WHERE s."StudentId" = @studentId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@studentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT b."BorrowingId", b."ActualReturnDate", b."BorrowedAt", b."EquipmentId", b."ExpectedReturnDate", b."Status", b."StudentId", s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear", e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Borrowings" AS b
+      INNER JOIN "Students" AS s ON b."StudentId" = s."StudentId"
+      INNER JOIN "Equipment" AS e ON b."EquipmentId" = e."EquipmentId"
+      WHERE b."StudentId" = @studentId
+      ORDER BY b."BorrowedAt" DESC, b."BorrowingId" DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@equipmentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Equipment" AS e
+      WHERE e."EquipmentId" = @equipmentId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@equipmentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT b."BorrowingId", b."ActualReturnDate", b."BorrowedAt", b."EquipmentId", b."ExpectedReturnDate", b."Status", b."StudentId", s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear", e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Borrowings" AS b
+      INNER JOIN "Students" AS s ON b."StudentId" = s."StudentId"
+      INNER JOIN "Equipment" AS e ON b."EquipmentId" = e."EquipmentId"
+      WHERE b."EquipmentId" = @equipmentId
+      ORDER BY b."BorrowedAt" DESC, b."BorrowingId" DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT b."BorrowingId", b."ActualReturnDate", b."BorrowedAt", b."EquipmentId", b."ExpectedReturnDate", b."Status", b."StudentId", s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear", e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Borrowings" AS b
+      INNER JOIN "Students" AS s ON b."StudentId" = s."StudentId"
+      INNER JOIN "Equipment" AS e ON b."EquipmentId" = e."EquipmentId"
+      WHERE b."Status" = 0
+      ORDER BY b."BorrowedAt", b."BorrowingId"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@studentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear"
+      FROM "Students" AS s
+      WHERE s."StudentId" = @studentId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@studentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT b."BorrowingId", b."ActualReturnDate", b."BorrowedAt", b."EquipmentId", b."ExpectedReturnDate", b."Status", b."StudentId", s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear", e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Borrowings" AS b
+      INNER JOIN "Students" AS s ON b."StudentId" = s."StudentId"
+      INNER JOIN "Equipment" AS e ON b."EquipmentId" = e."EquipmentId"
+      WHERE b."StudentId" = @studentId
+      ORDER BY b."BorrowedAt" DESC, b."BorrowingId" DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@studentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear"
+      FROM "Students" AS s
+      WHERE s."StudentId" = @studentId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@equipmentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Equipment" AS e
+      WHERE e."EquipmentId" = @equipmentId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@borrowingId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT b."BorrowingId", b."ActualReturnDate", b."BorrowedAt", b."EquipmentId", b."ExpectedReturnDate", b."Status", b."StudentId", s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear", e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Borrowings" AS b
+      INNER JOIN "Students" AS s ON b."StudentId" = s."StudentId"
+      INNER JOIN "Equipment" AS e ON b."EquipmentId" = e."EquipmentId"
+      WHERE b."BorrowingId" = @borrowingId
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear"
+      FROM "Students" AS s
+      ORDER BY s."StudentName", s."StudentId"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Equipment" AS e
+      ORDER BY e."EquipmentName", e."EquipmentId"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT b."BorrowingId", b."ActualReturnDate", b."BorrowedAt", b."EquipmentId", b."ExpectedReturnDate", b."Status", b."StudentId", s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear", e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Borrowings" AS b
+      INNER JOIN "Students" AS s ON b."StudentId" = s."StudentId"
+      INNER JOIN "Equipment" AS e ON b."EquipmentId" = e."EquipmentId"
+      ORDER BY b."BorrowedAt", b."BorrowingId"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT s."Value"
+      FROM (
+          SELECT nextval(
+              'public."StudentIdSequence"'::regclass
+          )::integer AS "Value"
+      ) AS s
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?', @p2='?', @p3='?', @p4='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Students" ("StudentId", "ContactInformation", "StudentName", "StudentNumber", "StudentYear")
+      VALUES (@p0, @p1, @p2, @p3, @p4)
+      RETURNING "IsAllowedToBorrow", "NormalizedStudentNumber";
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@studentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear"
+      FROM "Students" AS s
+      WHERE s."StudentId" = @studentId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@studentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear"
+      FROM "Students" AS s
+      WHERE s."StudentId" = @studentId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[p0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT * FROM "Students"
+      WHERE "StudentId" = @p0
+      FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[@p2='?' (DbType = Int32), @p0='?', @p1='?'], CommandType='Text', CommandTimeout='30']
+      UPDATE "Students" SET "ContactInformation" = @p0, "StudentName" = @p1
+      WHERE "StudentId" = @p2
+      RETURNING "NormalizedStudentNumber";
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@studentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear"
+      FROM "Students" AS s
+      WHERE s."StudentId" = @studentId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT s."Value"
+      FROM (
+          SELECT nextval(
+              'public."StudentIdSequence"'::regclass
+          )::integer AS "Value"
+      ) AS s
+      LIMIT 2
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (17ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?', @p2='?', @p3='?', @p4='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Students" ("StudentId", "ContactInformation", "StudentName", "StudentNumber", "StudentYear")
+      VALUES (@p0, @p1, @p2, @p3, @p4)
+      RETURNING "IsAllowedToBorrow", "NormalizedStudentNumber";
+fail: Microsoft.EntityFrameworkCore.Update[10000]
+      An exception occurred in the database while saving changes for context type 'EquipmentBorrowing.Infrastructure.Persistence.EquipmentBorrowingDbContext'.
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---> Npgsql.PostgresException (0x80004005): 23505: duplicate key value violates unique constraint "UX_Students_NormalizedStudentNumber"
+      
+      DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: 23505
+          MessageText: duplicate key value violates unique constraint "UX_Students_NormalizedStudentNumber"
+          Detail: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+          SchemaName: public
+          TableName: Students
+          ConstraintName: UX_Students_NormalizedStudentNumber
+          File: nbtinsert.c
+          Line: 673
+          Routine: _bt_check_unique
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---> Npgsql.PostgresException (0x80004005): 23505: duplicate key value violates unique constraint "UX_Students_NormalizedStudentNumber"
+      
+      DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: 23505
+          MessageText: duplicate key value violates unique constraint "UX_Students_NormalizedStudentNumber"
+          Detail: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+          SchemaName: public
+          TableName: Students
+          ConstraintName: UX_Students_NormalizedStudentNumber
+          File: nbtinsert.c
+          Line: 673
+          Routine: _bt_check_unique
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[p0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT * FROM "Students"
+      WHERE "StudentId" = @p0
+      FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = Boolean)], CommandType='Text', CommandTimeout='30']
+      UPDATE "Students" SET "IsAllowedToBorrow" = @p0
+      WHERE "StudentId" = @p1
+      RETURNING "NormalizedStudentNumber";
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@studentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear"
+      FROM "Students" AS s
+      WHERE s."StudentId" = @studentId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[p0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT * FROM "Students"
+      WHERE "StudentId" = @p0
+      FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@borrowingId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT b."StudentId", b."EquipmentId"
+      FROM "Borrowings" AS b
+      WHERE b."BorrowingId" = @borrowingId
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[p0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT * FROM "Students"
+      WHERE "StudentId" = @p0
+      FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[p0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT * FROM "Equipment"
+      WHERE "EquipmentId" = @p0
+      FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@borrowingId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT b."BorrowingId", b."ActualReturnDate", b."BorrowedAt", b."EquipmentId", b."ExpectedReturnDate", b."Status", b."StudentId"
+      FROM "Borrowings" AS b
+      WHERE b."BorrowingId" = @borrowingId
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[@p2='?' (DbType = Int32), @p0='?' (DbType = Date), @p1='?' (DbType = Int32), @p4='?' (DbType = Int32), @p3='?' (DbType = Boolean)], CommandType='Text', CommandTimeout='30']
+      UPDATE "Borrowings" SET "ActualReturnDate" = @p0, "Status" = @p1
+      WHERE "BorrowingId" = @p2;
+      UPDATE "Equipment" SET "IsAvailable" = @p3
+      WHERE "EquipmentId" = @p4
+      RETURNING "NormalizedEquipmentIdentifier";
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@borrowingId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT b."BorrowingId", b."ActualReturnDate", b."BorrowedAt", b."EquipmentId", b."ExpectedReturnDate", b."Status", b."StudentId", s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear", e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Borrowings" AS b
+      INNER JOIN "Students" AS s ON b."StudentId" = s."StudentId"
+      INNER JOIN "Equipment" AS e ON b."EquipmentId" = e."EquipmentId"
+      WHERE b."BorrowingId" = @borrowingId
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[p0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT * FROM "Students"
+      WHERE "StudentId" = @p0
+      FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = Boolean)], CommandType='Text', CommandTimeout='30']
+      UPDATE "Students" SET "IsAllowedToBorrow" = @p0
+      WHERE "StudentId" = @p1
+      RETURNING "NormalizedStudentNumber";
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@studentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear"
+      FROM "Students" AS s
+      WHERE s."StudentId" = @studentId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[p0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT * FROM "Students"
+      WHERE "StudentId" = @p0
+      FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[@studentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT count(*)::int
+      FROM "Borrowings" AS b
+      WHERE b."StudentId" = @studentId AND b."Status" = 0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[p0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT * FROM "Equipment"
+      WHERE "EquipmentId" = @p0
+      FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@equipmentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT EXISTS (
+          SELECT 1
+          FROM "Borrowings" AS b
+          WHERE b."EquipmentId" = @equipmentId AND b."Status" = 0)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Date), @p1='?' (DbType = Date), @p2='?' (DbType = Int32), @p3='?' (DbType = Date), @p4='?' (DbType = Int32), @p5='?' (DbType = Int32), @p7='?' (DbType = Int32), @p6='?' (DbType = Boolean)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Borrowings" ("ActualReturnDate", "BorrowedAt", "EquipmentId", "ExpectedReturnDate", "Status", "StudentId")
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5)
+      RETURNING "BorrowingId";
+      UPDATE "Equipment" SET "IsAvailable" = @p6
+      WHERE "EquipmentId" = @p7
+      RETURNING "NormalizedEquipmentIdentifier";
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@borrowingId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT b."BorrowingId", b."ActualReturnDate", b."BorrowedAt", b."EquipmentId", b."ExpectedReturnDate", b."Status", b."StudentId", s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear", e."EquipmentId", e."Description", e."EquipmentIdentifier", e."EquipmentName", e."IsAvailable", e."NormalizedEquipmentIdentifier"
+      FROM "Borrowings" AS b
+      INNER JOIN "Students" AS s ON b."StudentId" = s."StudentId"
+      INNER JOIN "Equipment" AS e ON b."EquipmentId" = e."EquipmentId"
+      WHERE b."BorrowingId" = @borrowingId
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[p0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT * FROM "Students"
+      WHERE "StudentId" = @p0
+      FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@studentId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT s."StudentId", s."ContactInformation", s."IsAllowedToBorrow", s."NormalizedStudentNumber", s."StudentName", s."StudentNumber", s."StudentYear"
+      FROM "Students" AS s
+      WHERE s."StudentId" = @studentId
+      LIMIT 1

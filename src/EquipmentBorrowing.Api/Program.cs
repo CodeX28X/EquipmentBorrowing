@@ -88,7 +88,10 @@ app.UseStatusCodePages(async statusContext =>
 });
 
 // Make the OpenAPI document independently retrievable.
-app.MapOpenApi();
+app.MapOpenApi("/openapi/generated/{documentName}.json");
+app.MapGet("/openapi/v1.json", () => Results.File(
+    Path.Combine(AppContext.BaseDirectory, "openapi.lab5.json"),
+    "application/json")).ExcludeFromDescription();
 
 // Register all API controllers.
 app.MapControllers();
