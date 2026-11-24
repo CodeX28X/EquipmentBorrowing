@@ -133,7 +133,7 @@ public partial class EquipmentViewModel : ObservableObject
             await _equipmentRepository.GetAllAsync();
 
         // Populate the complete equipment collection
-        // using actual records retrieved from PostgreSQL.
+        // using actual records retrieved from the API.
         Equipment.Clear();
 
         foreach (Equipment item in equipment)
@@ -181,7 +181,7 @@ public partial class EquipmentViewModel : ObservableObject
         catch (Exception)
         {
             StatusMessage =
-                "Unable to load equipment. Check the database connection.";
+                "Unable to load equipment. Check that the API is running.";
         }
         finally
         {

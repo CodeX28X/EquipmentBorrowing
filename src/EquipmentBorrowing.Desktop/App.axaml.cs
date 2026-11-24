@@ -3,11 +3,9 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using EquipmentBorrowing.Desktop.ViewModels;
 using EquipmentBorrowing.Desktop.Views;
-using EquipmentBorrowing.Infrastructure.Persistence;
-using EquipmentBorrowing.Infrastructure.Repositories;
-using EquipmentBorrowing.Infrastructure.Services;
-using Microsoft.EntityFrameworkCore;
 using System;
+using System.Net.Http;
+using EquipmentBorrowing.Desktop.Services;
 
 namespace EquipmentBorrowing.Desktop;
 
@@ -23,53 +21,23 @@ public partial class App : Avalonia.Application
         if (ApplicationLifetime
             is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            const string connectionVariable =
-                "EQUIPMENTBORROWING_CONNECTION_STRING";
-
-            string? connectionString =
-                Environment.GetEnvironmentVariable(
-                    connectionVariable);
-
-            if (string.IsNullOrWhiteSpace(connectionString))
+            string? configuredUrl = Environment.GetEnvironmentVariable("EQUIPMENTBORROWING_API_URL");
+            var httpClient = new HttpClient
             {
-                throw new InvalidOperationException(
-                    $"Missing {connectionVariable}. " +
-                    "Configure the PostgreSQL connection string.");
-            }
-
-            var options =
-                new DbContextOptionsBuilder<
-                    EquipmentBorrowingDbContext>()
-                    .UseNpgsql(connectionString)
-                    .Options;
-
-            var contextFactory =
-                new EquipmentBorrowingContextFactory(options);
-
-            // Independent read-only repositories.
-            var studentReader =
-                new EfStudentReadRepository(contextFactory);
-
-            var equipmentReader =
-                new EfEquipmentReadRepository(contextFactory);
-
-            var borrowingReader =
-                new EfActiveBorrowingsReader(contextFactory);
-
-
-            // UC-07/UC-08: Student and equipment borrowing histories.
-            var historyReader =
-                new EfBorrowingHistoryReader(contextFactory);
-
-            // UC-09: Search, filter, and sort borrowings.
-            var searchReader =
-                new EfBorrowingSearchReader(contextFactory);
-
-            var atomicBorrowingService =
-                new PostgreSqlAtomicBorrowingService(contextFactory);
-
-            var equipmentManagementService =
-                new PostgreSqlEquipmentManagementService(contextFactory);
+                BaseAddress = new Uri(string.IsNullOrWhiteSpace(configuredUrl)
+                    ? "http://localhost:5080/api/v1/"
+                    : configuredUrl.Trim().TrimEnd('/') + "/"),
+                Timeout = TimeSpan.FromSeconds(15)
+            };
+            desktop.Exit += (_, _) => httpClient.Dispose();
+            var apiClient = new HttpEquipmentBorrowingClient(httpClient);
+            var studentReader = apiClient;
+            var equipmentReader = apiClient;
+            var borrowingReader = apiClient;
+            var historyReader = apiClient;
+            var searchReader = apiClient;
+            var atomicBorrowingService = apiClient;
+            var equipmentManagementService = apiClient;
 
             // Equipment catalog.
             var equipmentViewModel =
@@ -114,7 +82,7 @@ public partial class App : Avalonia.Application
             // Student Management.
 
             var studentManagementService =
-                 new PostgreSqlStudentManagementService(contextFactory);
+                 apiClient;
 
             var studentManagementViewModel =
                 new StudentManagementViewModel(
@@ -142,7 +110,7 @@ public partial class App : Avalonia.Application
                     historyReader, studentReader, equipmentReader)
             };
 
-            // UC-09: read-only PostgreSQL borrowing search.
+            // UC-09: server-side borrowing search through HTTP.
             var borrowingSearchView = new BorrowingSearchView
             {
                 DataContext = new BorrowingSearchViewModel(searchReader)

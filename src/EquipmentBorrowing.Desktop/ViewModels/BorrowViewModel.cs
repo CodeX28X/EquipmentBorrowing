@@ -175,7 +175,7 @@ public partial class BorrowViewModel : ObservableObject
         }
         catch (Exception)
         {
-            StatusMessage = "Unable to load records. Check the PostgreSQL connection and retry.";
+            StatusMessage = "Unable to load records. Check that the API is running and retry.";
         }
         finally
         {

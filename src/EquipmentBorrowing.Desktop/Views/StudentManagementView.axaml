@@ -94,10 +94,6 @@
                         <TextBox Text="{Binding ContactInformation, Mode=TwoWay}"
                                  PlaceholderText="Email or phone"/>
 
-                        <TextBlock Text="Year level (optional)"/>
-                        <TextBox Text="{Binding StudentYear, Mode=TwoWay}"
-                                 PlaceholderText="e.g. 3"/>
-
                         <Button Content="Save student"
                                 HorizontalAlignment="Stretch"
                                 IsEnabled="{Binding !IsBusy}"

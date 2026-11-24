@@ -129,7 +129,7 @@ public partial class StudentManagementViewModel : ObservableObject
         catch (Exception)
         {
             StatusMessage =
-                "Unable to load students. Check the database connection.";
+                "Unable to load students. Check that the API is running.";
         }
         finally
         {
@@ -165,8 +165,7 @@ public partial class StudentManagementViewModel : ObservableObject
             return;
         }
 
-        if (!TryGetStudentYear(out int? year))
-            return;
+        int? year = null;
 
         IsBusy = true;
 
@@ -184,12 +183,11 @@ public partial class StudentManagementViewModel : ObservableObject
             }
             else
             {
-                result = await _managementService.UpdateAsync(
+                result = await _managementService.UpdateProfileAsync(
                     SelectedStudent.StudentId,
                     StudentNumber,
                     StudentName,
-                    ContactInformation,
-                    year);
+                    ContactInformation);
             }
 
             StatusMessage = result.Message;
