@@ -84,7 +84,7 @@ public partial class BorrowingSearchViewModel : ObservableObject
             // Clear stale results: do not display them as if they matched
             // a query that failed to load.
             Borrowings.Clear();
-            StatusMessage = "Unable to load borrowings from PostgreSQL. " +
+            StatusMessage = "Unable to load borrowings from the API. " +
                             "Check the connection and choose Search to retry.";
         }
         finally

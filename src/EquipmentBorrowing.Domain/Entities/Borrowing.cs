@@ -57,6 +57,34 @@ public class Borrowing
         Status = BorrowingStatus.Active;
     }
 
+    // Reconstruct an HTTP read snapshot without changing persisted state.
+    public static Borrowing FromReadSnapshot(
+        int borrowingId, Student student, Equipment equipment,
+        DateOnly borrowedDate, DateOnly expectedReturnDate,
+        DateOnly? returnedDate, string status)
+    {
+        if (borrowingId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(borrowingId));
+
+        var borrowing = new Borrowing(student, equipment, borrowedDate, expectedReturnDate)
+        {
+            BorrowingId = borrowingId
+        };
+
+        switch (status)
+        {
+            case "Active" when returnedDate is null:
+                equipment.MarkAsBorrowed();
+                break;
+            case "Returned" when returnedDate.HasValue:
+                borrowing.MarkAsReturned(returnedDate.Value);
+                break;
+            default:
+                throw new ArgumentException("Invalid borrowing snapshot.", nameof(status));
+        }
+        return borrowing;
+    }
+
     public void MarkAsReturned(DateOnly actualReturnDate)
     {
         if (Status != BorrowingStatus.Active)

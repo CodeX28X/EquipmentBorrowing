@@ -71,7 +71,7 @@ public partial class ActiveBorrowingsViewModel : ObservableObject
         {
             StatusMessage =
                 "Unable to load active borrowings. " +
-                "Check the database connection and retry.";
+                "Check that the API is running and retry.";
         }
         finally
         {
@@ -95,9 +95,8 @@ public partial class ActiveBorrowingsViewModel : ObservableObject
 
         try
         {
-            var result = await _atomicBorrowingService.ReturnAsync(
-                borrowing.StudentId,
-                borrowing.EquipmentId,
+            var result = await _atomicBorrowingService.ReturnByIdAsync(
+                borrowing.BorrowingId,
                 GetManilaToday());
 
             StatusMessage = result.Message;

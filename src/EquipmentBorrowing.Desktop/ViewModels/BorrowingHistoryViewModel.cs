@@ -96,7 +96,7 @@ public partial class BorrowingHistoryViewModel : ObservableObject
         catch (Exception)
         {
             History.Clear();
-            StatusMessage = "Unable to load the selection list. Check PostgreSQL and retry.";
+            StatusMessage = "Unable to load the selection list. Check that the API is running and retry.";
             IsBusy = false;
         }
     }
