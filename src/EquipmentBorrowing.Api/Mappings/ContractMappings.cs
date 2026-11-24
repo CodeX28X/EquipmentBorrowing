@@ -26,4 +26,21 @@ public static class ContractMappings
             equipment.Description,
             equipment.IsAvailable);
     }
+
+    public static BorrowingResponse ToResponse(
+    this Borrowing borrowing)
+    {
+        return new BorrowingResponse(
+            borrowing.BorrowingId,
+            borrowing.StudentId,
+            borrowing.EquipmentId,
+            borrowing.BorrowedAt,
+            borrowing.ExpectedReturnDate,
+            borrowing.ActualReturnDate,
+            borrowing.Status.ToString(),
+            borrowing.Student.StudentNumber,
+            borrowing.Student.StudentName,
+            borrowing.Equipment.EquipmentIdentifier,
+            borrowing.Equipment.EquipmentName);
+    }
 }

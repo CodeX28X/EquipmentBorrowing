@@ -41,6 +41,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBorrowingSearchReader,
             EfBorrowingSearchReader>();
 
+        services.AddScoped<IBorrowingDetailsReader,
+            EfBorrowingDetailsReader>();
+
         // Transactional application services.
         services.AddScoped<IAtomicBorrowingService,
             PostgreSqlAtomicBorrowingService>();

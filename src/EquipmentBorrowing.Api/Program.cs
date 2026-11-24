@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using EquipmentBorrowing.Api.Contracts;
 using EquipmentBorrowing.Api.Extensions;
 using EquipmentBorrowing.Api.Middleware;
+using EquipmentBorrowing.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,6 +44,11 @@ builder.Services.AddOpenApi();
 // Register existing application and PostgreSQL services.
 builder.Services.AddEquipmentBorrowingServices(
     builder.Configuration);
+
+builder.Services.AddSingleton<TimeProvider>(
+    TimeProvider.System);
+
+builder.Services.AddSingleton<ApplicationClock>();
 
 var app = builder.Build();
 

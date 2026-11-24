@@ -30,9 +30,14 @@ public sealed class PostgreSqlAtomicBorrowingService
         IReadOnlyList<Borrowing> Borrowings,
         string SuccessMessage)
     {
-        public static PreparedOperation Reject(string message) =>
+        public static PreparedOperation Reject(
+            string message,
+            OperationErrorKind errorKind =
+                OperationErrorKind.Validation) =>
             new(
-                BorrowingOperationResult.Rejected(message),
+                BorrowingOperationResult.Rejected(
+                    message,
+                    errorKind),
                 Array.Empty<Borrowing>(),
                 string.Empty);
 
@@ -157,7 +162,8 @@ public sealed class PostgreSqlAtomicBorrowingService
         {
             return Task.FromResult(
                 BorrowingOperationResult.Rejected(
-                    "A student may borrow at most three active items."));
+                    "A student may borrow at most three active items.",
+                    OperationErrorKind.Conflict));
         }
 
         if (expectedReturnDate <= checkoutDate)
@@ -194,13 +200,15 @@ public sealed class PostgreSqlAtomicBorrowingService
                 if (student is null)
                 {
                     return PreparedOperation.Reject(
-                        "Student does not exist.");
+                        "Student does not exist.",
+                        OperationErrorKind.NotFound);
                 }
 
                 if (!student.IsAllowedToBorrow)
                 {
                     return PreparedOperation.Reject(
-                        "Student is not eligible to borrow.");
+                        "Student is not eligible to borrow.",
+                        OperationErrorKind.Conflict);
                 }
 
                 int activeCount = await db.Borrowings
@@ -214,7 +222,8 @@ public sealed class PostgreSqlAtomicBorrowingService
                 {
                     return PreparedOperation.Reject(
                         "Checkout would exceed the " +
-                        "three-item borrowing limit.");
+                        "three-item borrowing limit.",
+                        OperationErrorKind.Conflict);
                 }
 
                 var selectedEquipment = new List<Equipment>();
@@ -238,13 +247,15 @@ public sealed class PostgreSqlAtomicBorrowingService
                     if (equipment is null)
                     {
                         return PreparedOperation.Reject(
-                            $"Equipment {equipmentId} does not exist.");
+                            $"Equipment {equipmentId} does not exist.",
+                            OperationErrorKind.NotFound);
                     }
 
                     if (!equipment.IsAvailable)
                     {
                         return PreparedOperation.Reject(
-                            $"Equipment {equipmentId} is unavailable.");
+                            $"Equipment {equipmentId} is unavailable.",
+                            OperationErrorKind.Conflict);
                     }
 
                     bool hasActiveLoan = await db.Borrowings
@@ -257,7 +268,8 @@ public sealed class PostgreSqlAtomicBorrowingService
                     {
                         return PreparedOperation.Reject(
                             $"Equipment {equipmentId} " +
-                            "already has an active borrowing.");
+                            "already has an active borrowing.",
+                            OperationErrorKind.Conflict);
                     }
 
                     selectedEquipment.Add(equipment);
@@ -317,7 +329,8 @@ public sealed class PostgreSqlAtomicBorrowingService
                 if (students.Count == 0)
                 {
                     return PreparedOperation.Reject(
-                        "Student does not exist.");
+                        "Student does not exist.",
+                        OperationErrorKind.NotFound);
                 }
 
                 // Never reject a return because a student
@@ -338,7 +351,8 @@ public sealed class PostgreSqlAtomicBorrowingService
                 if (equipment is null)
                 {
                     return PreparedOperation.Reject(
-                        "Equipment does not exist.");
+                        "Equipment does not exist.",
+                        OperationErrorKind.NotFound);
                 }
 
                 Borrowing? borrowing = await db.Borrowings
@@ -352,13 +366,121 @@ public sealed class PostgreSqlAtomicBorrowingService
                 {
                     return PreparedOperation.Reject(
                         "No active borrowing exists for " +
-                        "this student and equipment.");
+                        "this student and equipment.",
+                        OperationErrorKind.Conflict);
                 }
 
                 if (actualReturnDate < borrowing.BorrowedAt)
                 {
                     return PreparedOperation.Reject(
                         "Return date cannot precede checkout date.");
+                }
+
+                borrowing.MarkAsReturned(actualReturnDate);
+                equipment.MarkAsAvailable();
+
+                return PreparedOperation.Ready(
+                    "Equipment returned successfully.",
+                    new[] { borrowing });
+            },
+            cancellationToken);
+    }
+
+    public Task<BorrowingOperationResult> ReturnByIdAsync(
+    int borrowingId,
+    DateOnly actualReturnDate,
+    CancellationToken cancellationToken = default)
+    {
+        if (borrowingId <= 0)
+        {
+            return Task.FromResult(
+                BorrowingOperationResult.Rejected(
+                    "Borrowing does not exist.",
+                    OperationErrorKind.NotFound));
+        }
+
+        return ExecuteAsync(
+            async (db, ct) =>
+            {
+                var reference = await db.Borrowings
+                    .AsNoTracking()
+                    .Where(b => b.BorrowingId == borrowingId)
+                    .Select(b => new
+                    {
+                        b.StudentId,
+                        b.EquipmentId
+                    })
+                    .SingleOrDefaultAsync(ct);
+
+                if (reference is null)
+                {
+                    return PreparedOperation.Reject(
+                        "Borrowing does not exist.",
+                        OperationErrorKind.NotFound);
+                }
+
+                // Lock the student first.
+                var students = await db.Students
+                    .FromSqlInterpolated(
+                        $"""
+                    SELECT * FROM "Students"
+                    WHERE "StudentId" = {reference.StudentId}
+                    FOR UPDATE
+                    """)
+                    .AsTracking()
+                    .ToListAsync(ct);
+
+                if (students.Count == 0)
+                {
+                    throw new InvalidOperationException(
+                        "Borrowing has no associated student.");
+                }
+
+                // Lock the equipment second.
+                var items = await db.Equipment
+                    .FromSqlInterpolated(
+                        $"""
+                    SELECT * FROM "Equipment"
+                    WHERE "EquipmentId" = {reference.EquipmentId}
+                    FOR UPDATE
+                    """)
+                    .AsTracking()
+                    .ToListAsync(ct);
+
+                Equipment? equipment = items.SingleOrDefault();
+
+                if (equipment is null)
+                {
+                    throw new InvalidOperationException(
+                        "Borrowing has no associated equipment.");
+                }
+
+                // Revalidate the exact borrowing after locking.
+                Borrowing? borrowing = await db.Borrowings
+                    .AsTracking()
+                    .SingleOrDefaultAsync(
+                        b => b.BorrowingId == borrowingId,
+                        ct);
+
+                if (borrowing is null)
+                {
+                    return PreparedOperation.Reject(
+                        "Borrowing does not exist.",
+                        OperationErrorKind.NotFound);
+                }
+
+                if (borrowing.Status != BorrowingStatus.Active)
+                {
+                    return PreparedOperation.Reject(
+                        "This borrowing has already been returned.",
+                        OperationErrorKind.Conflict);
+                }
+
+                if (actualReturnDate < borrowing.BorrowedAt)
+                {
+                    return PreparedOperation.Reject(
+                        "Return date cannot precede checkout date.",
+                        OperationErrorKind.Conflict);
                 }
 
                 borrowing.MarkAsReturned(actualReturnDate);
