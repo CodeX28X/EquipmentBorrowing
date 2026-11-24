@@ -94,7 +94,8 @@ public sealed class PostgreSqlEquipmentManagementService
             when (IsDuplicateIdentifier(exception))
         {
             return EquipmentOperationResult.Rejected(
-                "This equipment identifier is already registered.");
+                "This equipment identifier is already registered.",
+                OperationErrorKind.Conflict);
         }
         catch (ArgumentException exception)
         {
@@ -104,8 +105,11 @@ public sealed class PostgreSqlEquipmentManagementService
         catch (InvalidOperationException exception)
         {
             if (exception.Message == "Equipment does not exist.")
+            {
                 return EquipmentOperationResult.Rejected(
-                    exception.Message);
+                    exception.Message,
+                    OperationErrorKind.NotFound);
+            }
 
             return EquipmentOperationResult.Failed(
                 "Equipment operation could not be completed.");

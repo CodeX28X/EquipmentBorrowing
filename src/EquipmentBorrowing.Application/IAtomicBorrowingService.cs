@@ -14,6 +14,9 @@ public sealed record BorrowingOperationResult(
     string Message,
     IReadOnlyList<int> BorrowingIds)
 {
+
+    public OperationErrorKind ErrorKind { get; init; }
+
     public bool IsSuccess =>
         Status == BorrowingOperationStatus.Success;
 
@@ -23,19 +26,30 @@ public sealed record BorrowingOperationResult(
         new(BorrowingOperationStatus.Success, message, borrowingIds);
 
     public static BorrowingOperationResult Rejected(
-        string message) =>
-        new(BorrowingOperationStatus.Rejected, message, []);
+        string message,
+        OperationErrorKind errorKind =
+            OperationErrorKind.Validation) =>
+        new(BorrowingOperationStatus.Rejected, message, [])
+        {
+            ErrorKind = errorKind
+        };
 
     public static BorrowingOperationResult Failed(
         string message) =>
-        new(BorrowingOperationStatus.Failed, message, []);
+        new(BorrowingOperationStatus.Failed, message, [])
+        {
+            ErrorKind = OperationErrorKind.ServerError
+        };
 
     public static BorrowingOperationResult Unknown() =>
         new(
             BorrowingOperationStatus.OutcomeUnknown,
             "The database may have committed the operation. " +
             "Refresh the borrowing records before attempting it again.",
-            []);
+            [])
+        {
+            ErrorKind = OperationErrorKind.OutcomeUnknown
+        };
 }
 
 public interface IAtomicBorrowingService
@@ -50,6 +64,11 @@ public interface IAtomicBorrowingService
     Task<BorrowingOperationResult> ReturnAsync(
         int studentId,
         int equipmentId,
+        DateOnly actualReturnDate,
+        CancellationToken cancellationToken = default);
+
+    Task<BorrowingOperationResult> ReturnByIdAsync(
+        int borrowingId,
         DateOnly actualReturnDate,
         CancellationToken cancellationToken = default);
 }

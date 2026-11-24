@@ -14,29 +14,48 @@ public sealed record EquipmentOperationResult(
     string Message,
     int? EquipmentId = null)
 {
+    public OperationErrorKind ErrorKind { get; init; }
+
     public bool IsSuccess =>
         Status == EquipmentOperationStatus.Success;
 
     public static EquipmentOperationResult Success(
         int equipmentId,
         string message) =>
-        new(EquipmentOperationStatus.Success, message, equipmentId);
+        new(
+            EquipmentOperationStatus.Success,
+            message,
+            equipmentId);
 
     public static EquipmentOperationResult Rejected(
-        string message) =>
-        new(EquipmentOperationStatus.Rejected, message);
+        string message,
+        OperationErrorKind errorKind =
+            OperationErrorKind.Validation) =>
+        new(
+            EquipmentOperationStatus.Rejected,
+            message)
+        {
+            ErrorKind = errorKind
+        };
 
     public static EquipmentOperationResult Failed(
         string message) =>
-        new(EquipmentOperationStatus.Failed, message);
+        new(
+            EquipmentOperationStatus.Failed,
+            message)
+        {
+            ErrorKind = OperationErrorKind.ServerError
+        };
 
     public static EquipmentOperationResult Unknown() =>
         new(
             EquipmentOperationStatus.OutcomeUnknown,
             "The database may have saved the change. " +
-            "Refresh equipment records before trying again.");
+            "Refresh equipment records before trying again.")
+        {
+            ErrorKind = OperationErrorKind.OutcomeUnknown
+        };
 }
-
 public interface IEquipmentManagementService
 {
     Task<EquipmentOperationResult> RegisterAsync(
